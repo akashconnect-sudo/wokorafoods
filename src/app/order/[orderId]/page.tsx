@@ -68,7 +68,7 @@ export default function OrderPage() {
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="mx-auto mb-6 grid h-16 w-16 place-items-center rounded-full bg-brand-red shadow-neon"
+        className="mx-auto mb-6 grid h-16 w-16 place-items-center rounded-full bg-brand-yellow shadow-neon"
       >
         <Check className="h-8 w-8" />
       </motion.div>
@@ -87,7 +87,7 @@ export default function OrderPage() {
       <div className="mt-8 flex justify-between">
         {STEPS.map((step, index) => (
           <div key={step} className="flex flex-1 flex-col items-center">
-            <div className={`h-3 w-3 rounded-full ${index <= stepIndex ? "bg-brand-red shadow-neon" : "bg-white/20"}`} />
+            <div className={`h-3 w-3 rounded-full ${index <= stepIndex ? "bg-brand-yellow shadow-neon" : "bg-white/20"}`} />
             <p className="mt-2 text-[10px] uppercase tracking-wide text-brand-cream/60 sm:text-[11px]">
               {step === "served" ? "Delivered" : step}
             </p>

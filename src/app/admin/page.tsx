@@ -24,7 +24,7 @@ const STATUSES = ["placed", "preparing", "ready", "served", "cancelled"];
 
 function paymentTone(status: string) {
   if (status === "paid") return "bg-emerald-500/20 text-emerald-300 border-emerald-400/40";
-  if (status === "failed") return "bg-brand-red/25 text-brand-red border-brand-red/50";
+  if (status === "failed") return "bg-brand-yellow/25 text-brand-yellow border-brand-yellow/50";
   if (status === "pay_at_counter") return "bg-brand-gold/20 text-brand-gold border-brand-gold/40";
   return "bg-amber-500/20 text-amber-200 border-amber-400/40";
 }
@@ -125,7 +125,7 @@ export default function AdminOrdersPage() {
           return (
             <article
               key={order.id}
-              className={`card-surface p-5 ${unpaid ? "border border-brand-red/40" : ""}`}
+              className={`card-surface p-5 ${unpaid ? "border border-brand-yellow/40" : ""}`}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
@@ -146,7 +146,7 @@ export default function AdminOrdersPage() {
                     {paymentStatusLabel(order.paymentStatus)}
                     {order.paymentMethod ? ` · ${paymentMethodLabel(order.paymentMethod)}` : ""}
                   </span>
-                  <span className="rounded-full bg-brand-red/20 px-3 py-1 text-xs uppercase">
+                  <span className="rounded-full bg-brand-yellow/20 px-3 py-1 text-xs uppercase">
                     {kitchenStatusLabel(order.status)}
                   </span>
                 </div>

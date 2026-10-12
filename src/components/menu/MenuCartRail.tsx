@@ -55,7 +55,7 @@ export function MenuCartRail() {
                     onIncrement={() => increment(item.id)}
                     onDecrement={() => decrement(item.id)}
                   />
-                  <button type="button" onClick={() => removeItem(item.id)} className="text-[10px] text-brand-red">
+                  <button type="button" onClick={() => removeItem(item.id)} className="text-[10px] text-brand-yellow">
                     Remove
                   </button>
                 </div>

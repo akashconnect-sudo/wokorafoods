@@ -20,9 +20,12 @@ const config: Config = {
         ink: "rgb(var(--ink) / <alpha-value>)",
         charcoal: "rgb(var(--charcoal) / <alpha-value>)",
         brand: {
-          red: "#E8272C",
-          gold: "#F5A623",
-          cream: "rgb(var(--cream) / <alpha-value>)",
+          yellow: "#FFC800",
+          "yellow-light": "#FFD84D",
+          "yellow-dark": "#E0A800",
+          cream: "#F5F5F0",
+          black: "#0B0B0B",
+          card: "#141414",
         },
       },
       fontFamily: {
@@ -31,12 +34,12 @@ const config: Config = {
         wall: ["var(--font-bebas)", "sans-serif"],
       },
       boxShadow: {
-        neon: "0 0 20px rgba(232, 39, 44, 0.45)",
-        gold: "0 0 18px rgba(245, 166, 35, 0.35)",
+        neon: "0 0 20px rgba(255, 200, 0, 0.40)",
+        gold: "0 0 18px rgba(255, 216, 77, 0.35)",
       },
       backgroundImage: {
         "brand-glow":
-          "radial-gradient(ellipse at top, rgba(232,39,44,0.22), transparent 55%), radial-gradient(ellipse at bottom right, rgba(245,166,35,0.12), transparent 45%)",
+          "radial-gradient(ellipse at top, rgba(255,200,0,0.14), transparent 55%), radial-gradient(ellipse at bottom right, rgba(255,216,77,0.08), transparent 45%)",
       },
     },
   },

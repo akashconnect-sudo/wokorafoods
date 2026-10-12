@@ -76,7 +76,7 @@ export function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
               placeholder="Email"
               className="field-input"
             />
-            {error ? <p className="break-words text-sm text-brand-red">{error}</p> : null}
+            {error ? <p className="break-words text-sm text-brand-yellow">{error}</p> : null}
             <button disabled={loading} className="btn-glow w-full py-3">
               {loading ? "Sending..." : "Send reset link"}
             </button>

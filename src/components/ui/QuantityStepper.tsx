@@ -15,7 +15,7 @@ export function QuantityStepper({ value, onIncrement, onDecrement, compact }: Pr
       <button
         type="button"
         onClick={onDecrement}
-        className={`grid h-full place-items-center text-brand-cream/80 hover:text-brand-red ${compact ? "w-9" : "w-11"}`}
+        className={`grid h-full place-items-center text-brand-cream/80 hover:text-brand-yellow ${compact ? "w-9" : "w-11"}`}
         aria-label="Decrease quantity"
       >
         <Minus className="h-3.5 w-3.5" />
@@ -24,7 +24,7 @@ export function QuantityStepper({ value, onIncrement, onDecrement, compact }: Pr
       <button
         type="button"
         onClick={onIncrement}
-        className={`grid h-full place-items-center text-brand-cream/80 hover:text-brand-red ${compact ? "w-9" : "w-11"}`}
+        className={`grid h-full place-items-center text-brand-cream/80 hover:text-brand-yellow ${compact ? "w-9" : "w-11"}`}
         aria-label="Increase quantity"
       >
         <Plus className="h-3.5 w-3.5" />

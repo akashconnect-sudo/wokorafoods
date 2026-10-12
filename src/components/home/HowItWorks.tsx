@@ -25,7 +25,7 @@ export function HowItWorks() {
               transition={{ delay: index * 0.06 }}
               className="card-surface p-4 sm:p-6"
             >
-              <p className="font-wall text-3xl text-brand-red">0{index + 1}</p>
+              <p className="font-wall text-3xl text-brand-yellow">0{index + 1}</p>
               <step.icon className="mt-3 h-7 w-7 text-brand-gold" />
               <h3 className="mt-4 font-display text-lg font-semibold">{step.title}</h3>
               <p className="mt-2 text-sm text-brand-cream/65">{step.copy}</p>

@@ -1,0 +1,23 @@
+services:
+  app:
+    build: .
+    container_name: wokora-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://wokorafoods.com}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      STORE_ID: wokora
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      KITCHEN_ADMIN_PHONE: ${KITCHEN_ADMIN_PHONE:-}
+      KITCHEN_ADMIN_EMAIL: ${KITCHEN_ADMIN_EMAIL:-}
+      KITCHEN_ADMIN_PASSWORD: ${KITCHEN_ADMIN_PASSWORD:-}
+      KITCHEN_ADMIN_NAME: ${KITCHEN_ADMIN_NAME:-Wokora Kitchen}

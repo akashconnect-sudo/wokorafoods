@@ -128,7 +128,7 @@ export default function CartPage() {
                     onIncrement={() => increment(item.id)}
                     onDecrement={() => decrement(item.id)}
                   />
-                  <button onClick={() => removeItem(item.id)} className="text-xs text-brand-red">
+                  <button onClick={() => removeItem(item.id)} className="text-xs text-brand-yellow">
                     Remove
                   </button>
                 </div>
@@ -146,7 +146,7 @@ export default function CartPage() {
               key={type}
               type="button"
               onClick={() => setOrderType(type)}
-              className={`flex-1 rounded-full py-2 text-sm ${orderType === type ? "bg-brand-red" : ""}`}
+              className={`flex-1 rounded-full py-2 text-sm ${orderType === type ? "bg-brand-yellow" : ""}`}
             >
               {type === "dine_in" ? "Dine-in" : "Takeaway"}
             </button>
@@ -181,7 +181,7 @@ export default function CartPage() {
                 key={value}
                 type="button"
                 onClick={() => setPaymentMethod(value)}
-                className={`min-h-11 rounded-full px-1 py-2 ${paymentMethod === value ? "bg-brand-red" : "border border-white/10"}`}
+                className={`min-h-11 rounded-full px-1 py-2 ${paymentMethod === value ? "bg-brand-yellow" : "border border-white/10"}`}
               >
                 {label}
               </button>
@@ -197,14 +197,14 @@ export default function CartPage() {
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
           placeholder="Notes for the kitchen"
-          className="mt-4 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-brand-red"
+          className="mt-4 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-brand-yellow"
         />
         <dl className="mt-5 space-y-2 text-sm">
           <div className="flex justify-between"><dt>Subtotal</dt><dd>{formatINR(subtotal)}</dd></div>
           <div className="flex justify-between text-brand-cream/60"><dt>GST (5%)</dt><dd>{formatINR(tax)}</dd></div>
           <div className="flex justify-between font-display text-lg"><dt>Total</dt><dd className="text-brand-gold">{formatINR(total)}</dd></div>
         </dl>
-        {error && <p className="mt-3 text-sm text-brand-red">{error}</p>}
+        {error && <p className="mt-3 text-sm text-brand-yellow">{error}</p>}
         <button onClick={placeOrder} disabled={loading} className="btn-glow mt-5 w-full py-3">
           {status !== "authenticated" || !canUseCart
             ? "Sign in to place your order"

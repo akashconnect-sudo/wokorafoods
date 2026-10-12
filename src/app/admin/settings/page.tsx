@@ -116,7 +116,7 @@ export default function KitchenSettingsPage() {
                     {ticket.name} · {ticket.phone} · {new Date(ticket.createdAt).toLocaleString("en-IN")}
                   </p>
                 </div>
-                <span className="rounded-full bg-brand-red/20 px-3 py-1 text-xs uppercase">{ticket.status}</span>
+                <span className="rounded-full bg-brand-yellow/20 px-3 py-1 text-xs uppercase">{ticket.status}</span>
               </div>
               <p className="mt-3 text-sm text-brand-cream/80">{ticket.message}</p>
               <div className="mt-4 space-y-2">
@@ -143,7 +143,7 @@ export default function KitchenSettingsPage() {
                 <button onClick={() => setStatus(ticket.id, "in_progress")} className="min-h-11 rounded-full border border-white/15 px-3 py-2 sm:min-h-0">
                   In progress
                 </button>
-                <button onClick={() => setStatus(ticket.id, "closed")} className="min-h-11 rounded-full border border-brand-red/40 px-3 py-2 text-brand-red sm:min-h-0">
+                <button onClick={() => setStatus(ticket.id, "closed")} className="min-h-11 rounded-full border border-brand-yellow/40 px-3 py-2 text-brand-yellow sm:min-h-0">
                   Close case
                 </button>
               </div>

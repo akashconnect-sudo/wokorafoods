@@ -180,7 +180,7 @@ export default function SignupPage() {
               onChange={(password) => setForm({ ...form, password })}
               autoComplete="new-password"
             />
-            {error ? <p className="break-words text-sm text-brand-red">{error}</p> : null}
+            {error ? <p className="break-words text-sm text-brand-yellow">{error}</p> : null}
             <button disabled={loading || !emailVerified} className="btn-glow w-full py-3">
               {loading ? "Creating account..." : "Create account"}
             </button>

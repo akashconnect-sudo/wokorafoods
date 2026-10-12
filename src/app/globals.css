@@ -9,14 +9,7 @@ html.dark {
   --cream: 245 245 240;
   --background: #0d0d0d;
   --foreground: #f5f5f0;
-}
-
-html.light {
-  --ink: 246 243 236;
-  --charcoal: 255 255 255;
-  --cream: 26 26 26;
-  --background: #f6f3ec;
-  --foreground: #1a1a1a;
+  color-scheme: dark;
 }
 
 html {
@@ -51,33 +44,38 @@ textarea {
   touch-action: manipulation;
 }
 
+/* Festive mode: background kala hi rahega, sirf gold accents */
 html.festive body {
-  background:
-    radial-gradient(circle at 10% 0%, rgba(245, 166, 35, 0.12), transparent 35%),
-    radial-gradient(circle at 90% 10%, rgba(232, 39, 44, 0.18), transparent 40%),
-    rgb(var(--ink));
+  background: rgb(var(--ink));
 }
 
-html.light .card-surface,
-html.light header,
-html.light footer {
-  border-color: rgb(13 13 13 / 0.1);
+html.festive body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 100;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, #ffc800, transparent);
 }
 
-html.light input,
-html.light select,
-html.light textarea {
-  border-color: rgb(13 13 13 / 0.12);
-  background-color: #fff;
-  color: #1a1a1a;
+html.festive header {
+  border-bottom-color: rgba(255, 200, 0, 0.35);
+  box-shadow: 0 1px 24px rgba(255, 200, 0, 0.12);
 }
 
-html.light .hover\:text-white:hover {
-  color: #e8272c;
+html.festive .card-surface {
+  border-color: rgba(255, 200, 0, 0.22);
 }
 
-html.light .neon-red {
-  text-shadow: 0 0 8px rgba(232, 39, 44, 0.35);
+html.festive .heading-underline::after {
+  box-shadow: 0 0 18px rgba(255, 200, 0, 0.8);
+}
+
+html.festive .btn-glow {
+  box-shadow: 0 0 26px rgba(255, 200, 0, 0.5);
 }
 
 .dark-band {
@@ -107,21 +105,22 @@ html.light .neon-red {
     width: 4.5rem;
     margin-top: 0.45rem;
     border-radius: 999px;
-    background: #e8272c;
-    box-shadow: 0 0 14px #e8272c;
+    background: #ffc800;
+    box-shadow: 0 0 14px rgba(255, 200, 0, 0.7);
   }
 
+  /* Naam "neon-red" purane components ke liye rakha hai, color ab yellow hai */
   .neon-red {
-    text-shadow: 0 0 8px #e8272c, 0 0 22px rgba(232, 39, 44, 0.55);
+    text-shadow: 0 0 6px rgba(255, 200, 0, 0.3), 0 0 18px rgba(255, 200, 0, 0.14);
   }
 
   .neon-gold {
-    text-shadow: 0 0 8px #f5a623, 0 0 18px rgba(245, 166, 35, 0.45);
+    text-shadow: 0 0 6px rgba(255, 216, 77, 0.3), 0 0 16px rgba(255, 216, 77, 0.12);
   }
 
   .wall-art {
     @apply font-wall uppercase tracking-wide text-brand-cream/90;
-    text-shadow: 0 0 10px rgba(232, 39, 44, 0.55);
+    text-shadow: 0 0 10px rgba(255, 200, 0, 0.35);
   }
 
   .card-surface {
@@ -129,7 +128,13 @@ html.light .neon-red {
   }
 
   .btn-glow {
-    @apply inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-to-r from-brand-red to-orange-500 px-5 font-display font-semibold text-white shadow-neon transition;
+    @apply inline-flex min-h-11 items-center justify-center rounded-full px-5 font-display font-semibold text-black shadow-neon transition;
+    background-image: linear-gradient(to right, #ffc800, #e0a800);
+  }
+
+  .btn-glow:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 0 28px rgba(255, 200, 0, 0.55);
   }
 
   .menu-toolbar {
@@ -140,13 +145,12 @@ html.light .neon-red {
     @apply relative w-full min-w-0 shrink-0 sm:w-44 md:w-56 lg:w-72;
   }
 
-  .btn-glow:hover {
-    filter: brightness(1.08);
-    box-shadow: 0 0 28px rgba(232, 39, 44, 0.65);
+  .field-input {
+    @apply w-full min-h-11 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-base outline-none sm:text-sm;
   }
 
-  .field-input {
-    @apply w-full min-h-11 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-base outline-none focus:border-brand-red sm:text-sm;
+  .field-input:focus {
+    border-color: #ffc800;
   }
 
   .auth-shell {
@@ -194,4 +198,3 @@ select,
 textarea {
   color-scheme: inherit;
 }
-

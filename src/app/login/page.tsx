@@ -122,7 +122,7 @@ function LoginForm() {
               <PasswordField value={password} onChange={setPassword} />
             )}
             {otpHint && <p className="text-xs text-brand-gold">{otpHint}</p>}
-            {error && <p className="break-words text-sm text-brand-red">{error}</p>}
+            {error && <p className="break-words text-sm text-brand-yellow">{error}</p>}
             <button disabled={loading} className="btn-glow w-full py-3">
               {loading ? "Signing in..." : "Login"}
             </button>

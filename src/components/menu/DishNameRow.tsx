@@ -39,7 +39,7 @@ export function DishNameRow({ item }: { item: FoodCardItem }) {
         </span>
       </button>
       {item.isAvailable === false ? (
-        <p className="text-xs text-brand-red">Sold out</p>
+        <p className="text-xs text-brand-yellow">Sold out</p>
       ) : canUseCart && cartItem ? (
         <QuantityStepper
           compact
@@ -48,7 +48,7 @@ export function DishNameRow({ item }: { item: FoodCardItem }) {
           onDecrement={() => decrement(cartItem.id)}
         />
       ) : (
-        <button type="button" onClick={add} className="shrink-0 rounded-full border border-brand-red/50 px-4 py-2 text-sm font-semibold text-brand-red hover:bg-brand-red hover:text-white">
+        <button type="button" onClick={add} className="shrink-0 rounded-full border border-brand-yellow/50 px-4 py-2 text-sm font-semibold text-brand-yellow hover:bg-brand-yellow hover:text-white">
           ADD
         </button>
       )}

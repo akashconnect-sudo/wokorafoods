@@ -7,14 +7,13 @@ import { CATEGORY_META } from "@/lib/constants";
 export function CategoryStrip() {
   return (
     <section className="relative py-16 sm:py-20">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,rgba(245,166,35,0.16),transparent_36%),radial-gradient(circle_at_90%_80%,rgba(232,39,44,0.16),transparent_38%)]" />
-      <div className="relative mx-auto max-w-7xl page-pad">
+<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.04),transparent_55%)]" />      <div className="relative mx-auto max-w-7xl page-pad">
         <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
           <div>
-            <p className="font-wall text-xl text-brand-gold sm:text-2xl">Pick your craving</p>
+            <p className="font-wall text-xl text-brand-yellow sm:text-2xl">Pick your craving</p>
             <h2 className="heading-underline mt-1 font-display text-3xl font-bold sm:text-4xl">The wok list</h2>
           </div>
-          <Link href="/menu" className="min-h-11 w-full rounded-full border border-white/15 px-5 py-2 text-center text-sm text-brand-gold hover:border-brand-gold sm:w-auto">
+          <Link href="/menu" className="min-h-11 w-full rounded-full border border-white/15 px-5 py-2 text-center text-sm text-brand-yellow transition hover:border-brand-yellow hover:bg-brand-yellow/10 sm:w-auto">
             See all dishes
           </Link>
         </div>
@@ -24,7 +23,7 @@ export function CategoryStrip() {
             <Link
               key={category.slug}
               href={`/menu/${category.slug}`}
-              className="group relative isolate min-h-[150px] overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_18px_50px_rgba(0,0,0,0.35)] sm:min-h-[210px] lg:min-h-[280px]"
+              className="group relative isolate min-h-[150px] overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_18px_50px_rgba(0,0,0,0.35)] transition hover:border-brand-yellow/40 sm:min-h-[210px] lg:min-h-[280px]"
             >
               <Image
                 src={category.image}

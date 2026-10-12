@@ -12,7 +12,7 @@ export default function GlobalError({ reset }: { reset: () => void }) {
           style={{
             marginTop: 32,
             borderRadius: 999,
-            background: "#e8272c",
+            background: "#ffc800",
             color: "#fff",
             padding: "12px 24px",
             border: 0,

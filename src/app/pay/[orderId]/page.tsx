@@ -131,7 +131,7 @@ export default function PayPage() {
             key={value}
             type="button"
             onClick={() => setMethod(value)}
-            className={`flex-1 rounded-full py-2 ${method === value ? "bg-brand-red" : "border border-white/10"}`}
+            className={`flex-1 rounded-full py-2 ${method === value ? "bg-brand-yellow" : "border border-white/10"}`}
           >
             {value === "upi" ? "UPI apps" : "Card"}
           </button>
@@ -214,9 +214,9 @@ export default function PayPage() {
             <input required placeholder="Name on card" className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-3" />
           </>
         )}
-        {error && <p className="text-sm text-brand-red">{error}</p>}
+        {error && <p className="text-sm text-brand-yellow">{error}</p>}
         {order.paymentStatus === "failed" ? (
-          <p className="text-sm text-brand-red">Last attempt failed. Retry below, or open this bill in My Account.</p>
+          <p className="text-sm text-brand-yellow">Last attempt failed. Retry below, or open this bill in My Account.</p>
         ) : null}
         <button disabled={loading || (method === "upi" && upiReady && !upi?.valid)} className="btn-glow w-full py-3">
           {loading
@@ -229,7 +229,7 @@ export default function PayPage() {
           type="button"
           disabled={loading || savingFail}
           onClick={markFailed}
-          className="w-full rounded-full border border-brand-red/40 py-3 text-sm text-brand-red"
+          className="w-full rounded-full border border-brand-yellow/40 py-3 text-sm text-brand-yellow"
         >
           {savingFail ? "Saving..." : "Payment failed"}
         </button>

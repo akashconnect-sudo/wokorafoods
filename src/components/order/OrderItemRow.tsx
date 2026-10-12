@@ -45,7 +45,7 @@ export function OrderItemRow({
     <article className="flex items-start gap-3 border-b border-white/10 py-4 last:border-b-0 sm:items-center sm:gap-4">
       <button type="button" onClick={openPanel} className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full sm:h-[88px] sm:w-[88px] lg:h-28 lg:w-28">
         {broken ? (
-          <div className="grid h-full w-full place-items-center bg-brand-red/30 text-center text-xs">{item.name}</div>
+          <div className="grid h-full w-full place-items-center bg-brand-yellow/30 text-center text-xs">{item.name}</div>
         ) : (
           <Image src={item.imageUrl} alt={item.name} fill unoptimized className="object-cover" onError={() => setBroken(true)} />
         )}
@@ -71,7 +71,7 @@ export function OrderItemRow({
       </button>
       <div className="shrink-0">
         {item.isAvailable === false ? (
-          <p className="text-xs text-brand-red">Sold out</p>
+          <p className="text-xs text-brand-yellow">Sold out</p>
         ) : canUseCart && cartItem ? (
           <QuantityStepper
             compact

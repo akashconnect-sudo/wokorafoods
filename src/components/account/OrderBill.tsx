@@ -58,7 +58,7 @@ export function OrderBill({
   const unpaid = payStatus === "pending" || failed;
 
   return (
-    <article className={`card-surface p-5 ${failed ? "border border-brand-red/40" : ""}`}>
+    <article className={`card-surface p-5 ${failed ? "border border-brand-yellow/40" : ""}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="font-display text-2xl text-brand-gold">{displayOrderNumber(order.serialNumber)}</p>
@@ -69,7 +69,7 @@ export function OrderBill({
         </div>
         <div className="text-right">
           <p className="font-display text-xl">{formatINR(order.totalAmount)}</p>
-          <p className={`mt-1 text-xs uppercase tracking-wide ${failed ? "text-brand-red" : payStatus === "paid" ? "text-brand-gold" : "text-brand-cream/50"}`}>
+          <p className={`mt-1 text-xs uppercase tracking-wide ${failed ? "text-brand-yellow" : payStatus === "paid" ? "text-brand-gold" : "text-brand-cream/50"}`}>
             {paymentStatusLabel(payStatus)}
             {payMethod ? ` · ${paymentMethodLabel(payMethod)}` : ""}
           </p>
@@ -126,7 +126,7 @@ export function OrderBill({
       ) : null}
 
       {failed && payment?.failureReason ? (
-        <p className="mt-3 text-sm text-brand-red">{payment.failureReason}</p>
+        <p className="mt-3 text-sm text-brand-yellow">{payment.failureReason}</p>
       ) : null}
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -134,7 +134,7 @@ export function OrderBill({
           View bill
         </Link>
         {unpaid ? (
-          <Link href={`/pay/${order.id}`} className="rounded-full bg-brand-red px-4 py-2 text-sm text-white">
+          <Link href={`/pay/${order.id}`} className="rounded-full bg-brand-yellow px-4 py-2 text-sm text-white">
             {failed ? "Retry payment" : "Pay now"}
           </Link>
         ) : null}

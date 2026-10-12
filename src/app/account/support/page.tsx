@@ -81,14 +81,14 @@ export default function SupportPage() {
           value={form.email}
           onChange={(event) => setForm({ ...form, email: event.target.value })}
           placeholder="Your email — confirmation comes here"
-          className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-red"
+          className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-yellow"
         />
         <input
           required
           value={form.subject}
           onChange={(event) => setForm({ ...form, subject: event.target.value })}
           placeholder="Subject — e.g. Order #012 late"
-          className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-red"
+          className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-yellow"
         />
         <textarea
           required
@@ -96,7 +96,7 @@ export default function SupportPage() {
           onChange={(event) => setForm({ ...form, message: event.target.value })}
           placeholder="Tell us what happened"
           rows={5}
-          className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-red"
+          className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-yellow"
         />
         {done && <p className="text-sm text-brand-gold">{done}</p>}
         <button className="btn-glow w-full px-6 py-3 sm:w-auto">Send ticket</button>

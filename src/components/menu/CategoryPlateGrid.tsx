@@ -43,7 +43,7 @@ export function CategoryPlateGrid({
               title={featured.isVeg ? "Vegetarian" : "Non-vegetarian"}
             />
             {!featured.isVeg && (
-              <span className="absolute right-3 top-3 rounded-full bg-brand-red px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+              <span className="absolute right-3 top-3 rounded-full bg-brand-yellow px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
                 Chicken
               </span>
             )}

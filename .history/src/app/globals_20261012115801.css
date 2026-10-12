@@ -1,0 +1,203 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+html.dark {
+  --ink: 13 13 13;
+  --charcoal: 22 22 22;
+  --cream: 245 245 240;
+  --background: #0d0d0d;
+  --foreground: #f5f5f0;
+}
+
+html.light {
+  --ink: 246 243 236;
+  --charcoal: 255 255 255;
+  --cream: 26 26 26;
+  --background: #f6f3ec;
+  --foreground: #1a1a1a;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-inter), sans-serif;
+  overflow-x: clip;
+  min-height: 100svh;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+html.festive body {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 216, 77, 0.12), transparent 35%),
+    radial-gradient(circle at 90% 10%, rgba(255, 200, 0, 0.14), transparent 40%),
+    rgb(var(--ink));
+}
+
+html.light .card-surface,
+html.light header,
+html.light footer {
+  border-color: rgb(13 13 13 / 0.1);
+}
+
+html.light input,
+html.light select,
+html.light textarea {
+  border-color: rgb(13 13 13 / 0.12);
+  background-color: #fff;
+  color: #1a1a1a;
+}
+
+html.light .hover\:text-white:hover {
+  color: #b38600;
+}
+
+/* Light mode me yellow text padhne layak rakhne ke liye thoda dark gold */
+html.light .text-brand-yellow {
+  color: #b38600;
+}
+
+html.light .neon-red {
+  text-shadow: 0 0 8px rgba(255, 200, 0, 0.35);
+}
+
+.dark-band {
+  --ink: 13 13 13;
+  --charcoal: 22 22 22;
+  --cream: 245 245 240;
+  color: #f5f5f0;
+}
+
+.dark-band input,
+.dark-band select,
+.dark-band textarea {
+  border-color: rgb(255 255 255 / 0.15);
+  background-color: rgb(255 255 255 / 0.08);
+  color: #f5f5f0;
+}
+
+@layer components {
+  .heading-underline {
+    @apply relative inline-block;
+  }
+
+  .heading-underline::after {
+    content: "";
+    display: block;
+    height: 3px;
+    width: 4.5rem;
+    margin-top: 0.45rem;
+    border-radius: 999px;
+    background: #ffc800;
+    box-shadow: 0 0 14px rgba(255, 200, 0, 0.7);
+  }
+
+  /* Naam "neon-red" rakha hai taaki purane components na tootein, par color ab yellow hai */
+  .neon-red {
+    text-shadow: 0 0 6px rgba(255, 200, 0, 0.599), 0 0 18px rgba(222, 177, 13, 0.763);
+  }
+  
+  .neon-gold {
+    text-shadow: 0 0 6px rgba(255, 216, 77, 0.792), 0 0 16px rgba(255, 216, 77, 0.12);
+  }
+
+  .wall-art {
+    @apply font-wall uppercase tracking-wide text-brand-cream/90;
+    text-shadow: 0 0 10px rgba(255, 200, 0, 0.45);
+  }
+
+  .card-surface {
+    @apply rounded-2xl border border-white/10 bg-charcoal/80 backdrop-blur-sm;
+  }
+
+  .btn-glow {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full px-5 font-display font-semibold text-black shadow-neon transition;
+    background-image: linear-gradient(to right, #ffc800, #e0a800);
+  }
+
+  .menu-toolbar {
+    @apply sticky top-14 z-30 flex flex-col gap-2 rounded-2xl border border-white/10 bg-ink/95 px-2 py-2 backdrop-blur sm:top-16 sm:flex-row sm:items-center sm:gap-3 sm:px-2.5 sm:py-1.5;
+  }
+
+  .menu-search {
+    @apply relative w-full min-w-0 shrink-0 sm:w-44 md:w-56 lg:w-72;
+  }
+
+  .btn-glow:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 0 28px rgba(255, 200, 0, 0.55);
+  }
+
+  .field-input {
+    @apply w-full min-h-11 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-base outline-none focus:border-brand-yellow sm:text-sm;
+  }
+
+  .auth-shell {
+    @apply grid min-h-[calc(100svh-3.5rem)] sm:min-h-[calc(100svh-4rem)] lg:grid-cols-2;
+  }
+
+  .auth-panel {
+    @apply flex items-center justify-center px-3 py-8 xs:px-4 sm:px-6 sm:py-12 md:px-8;
+  }
+
+  .auth-card {
+    @apply w-full max-w-md min-w-0;
+  }
+
+  .page-pad {
+    @apply px-3 xs:px-4 sm:px-6;
+  }
+
+  .page-bottom {
+    @apply pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-10;
+  }
+
+  .stack-actions {
+    @apply flex w-full flex-col gap-2 sm:flex-row sm:items-stretch;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@media (max-width: 374px) {
+  .heading-underline::after {
+    width: 3rem;
+  }
+}
+
+input,
+select,
+textarea {
+  color-scheme: inherit;
+}

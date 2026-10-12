@@ -40,7 +40,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 key={tab.href}
                 href={tab.href}
                 className={`flex min-h-11 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm sm:shrink-0 sm:px-4 ${
-                  active ? "bg-brand-red text-white" : "border border-white/10 text-brand-cream/70"
+                  active ? "bg-brand-yellow text-white" : "border border-white/10 text-brand-cream/70"
                 }`}
               >
                 <tab.icon className="h-4 w-4" />

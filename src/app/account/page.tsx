@@ -156,14 +156,14 @@ export default function OrderHomePage() {
               <button
                 type="button"
                 onClick={() => setOrderType("dine_in")}
-                className={`flex-1 rounded-full px-4 py-1.5 sm:flex-none ${orderType === "dine_in" ? "bg-brand-red text-white" : "text-brand-cream/65"}`}
+                className={`flex-1 rounded-full px-4 py-1.5 sm:flex-none ${orderType === "dine_in" ? "bg-brand-yellow text-white" : "text-brand-cream/65"}`}
               >
                 Dine-in
               </button>
               <button
                 type="button"
                 onClick={() => setOrderType("takeaway")}
-                className={`flex-1 rounded-full px-4 py-1.5 sm:flex-none ${orderType === "takeaway" ? "bg-brand-red text-white" : "text-brand-cream/65"}`}
+                className={`flex-1 rounded-full px-4 py-1.5 sm:flex-none ${orderType === "takeaway" ? "bg-brand-yellow text-white" : "text-brand-cream/65"}`}
               >
                 Takeaway
               </button>
@@ -223,7 +223,7 @@ export default function OrderHomePage() {
                 >
                   <div className="relative h-36">
                     <Image src={item.imageUrl} alt={item.name} fill unoptimized className="object-cover" />
-                    <span className="absolute left-3 top-3 rounded-full bg-brand-red px-2 py-0.5 text-[10px] font-bold text-white">
+                    <span className="absolute left-3 top-3 rounded-full bg-brand-yellow px-2 py-0.5 text-[10px] font-bold text-white">
                       DEAL
                     </span>
                   </div>

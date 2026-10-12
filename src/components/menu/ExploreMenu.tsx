@@ -53,7 +53,7 @@ export function ExploreMenu({
             value={query}
             onChange={(event) => onQuery(event.target.value)}
             placeholder="Search"
-            className="w-full rounded-full border border-white/10 bg-white/5 py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-red"
+            className="w-full rounded-full border border-white/10 bg-white/5 py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-yellow"
           />
         </div>
       </div>
@@ -61,7 +61,7 @@ export function ExploreMenu({
         <button type="button" onClick={() => onActive("all")} className="w-[76px] shrink-0 text-center">
           <span
             className={`mx-auto grid h-[76px] w-[76px] place-items-center rounded-full border-2 text-xs font-semibold ${
-              active === "all" ? "border-brand-red bg-brand-red/20" : "border-white/15 bg-white/5"
+              active === "all" ? "border-brand-yellow bg-brand-yellow/20" : "border-white/15 bg-white/5"
             }`}
           >
             All
@@ -80,7 +80,7 @@ export function ExploreMenu({
             >
               <span
                 className={`relative mx-auto block h-[76px] w-[76px] overflow-hidden rounded-full border-2 ${
-                  selected ? "border-brand-red shadow-[0_0_18px_rgba(232,39,44,0.45)]" : "border-white/15"
+                  selected ? "border-brand-yellow shadow-[0_0_18px_rgba(232,39,44,0.45)]" : "border-white/15"
                 }`}
               >
                 {image ? (
@@ -142,7 +142,7 @@ function KitchenItemRow({ item }: { item: CatalogItem }) {
             <h3 className="font-display text-base font-semibold leading-tight sm:text-lg">{item.name}</h3>
             {item.description ? <p className="mt-1 line-clamp-2 text-sm text-brand-cream/55">{item.description}</p> : null}
             <p className="mt-2 font-display text-brand-gold">{formatINR(item.price)}</p>
-            {item.isAvailable === false ? <p className="mt-1 text-xs text-brand-red">Hidden from customers</p> : null}
+            {item.isAvailable === false ? <p className="mt-1 text-xs text-brand-yellow">Hidden from customers</p> : null}
           </div>
         </div>
       </div>

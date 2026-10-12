@@ -15,15 +15,15 @@ export function LocationHours() {
           <h2 className="heading-underline font-display text-3xl font-bold">Find us</h2>
           <div className="mt-8 space-y-5 text-brand-cream/80">
             <p className="flex min-w-0 gap-3">
-              <MapPin className="mt-1 h-5 w-5 shrink-0 text-brand-red" />
+              <MapPin className="mt-1 h-5 w-5 shrink-0 text-brand-yellow" />
               <span className="min-w-0 break-words">{address}</span>
             </p>
             <p className="flex gap-3">
-              <Phone className="mt-1 h-5 w-5 text-brand-red" />
+              <Phone className="mt-1 h-5 w-5 text-brand-yellow" />
               {BRAND.phone}
             </p>
             <div className="flex gap-3">
-              <Clock className="mt-1 h-5 w-5 text-brand-red" />
+              <Clock className="mt-1 h-5 w-5 text-brand-yellow" />
               <div>
                 {BRAND.hours.map((row) => (
                   <p key={row.day}>

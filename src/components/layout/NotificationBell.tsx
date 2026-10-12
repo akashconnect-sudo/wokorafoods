@@ -99,12 +99,12 @@ export function NotificationBell() {
             void readJson("/api/notifications", "PATCH").then(() => setUnread(0));
           }
         }}
-        className="relative rounded-full p-2 text-brand-cream hover:text-brand-red"
+        className="relative rounded-full p-2 text-brand-cream hover:text-brand-yellow"
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-brand-red px-1 text-[10px] font-bold">
+          <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-brand-yellow px-1 text-[10px] font-bold">
             {unread}
           </span>
         )}

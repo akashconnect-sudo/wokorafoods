@@ -249,7 +249,7 @@ function AdminMenuInner() {
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-sm sm:justify-end">
-            {isDraft ? <span className="text-xs text-brand-red">Draft</span> : null}
+            {isDraft ? <span className="text-xs text-brand-yellow">Draft</span> : null}
             <button
               type="button"
               onClick={async () => {
@@ -262,7 +262,7 @@ function AdminMenuInner() {
                 }
               }}
               className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-                item.isAvailable ? "border border-white/15" : "bg-brand-red text-white"
+                item.isAvailable ? "border border-white/15" : "bg-brand-yellow text-white"
               }`}
             >
               {item.isAvailable ? "Hide" : "Publish"}
@@ -337,7 +337,7 @@ function AdminMenuInner() {
             <button
               type="button"
               onClick={removeCategory}
-              className="flex-1 rounded-full border border-brand-red/40 px-3 py-2 text-sm text-brand-red sm:flex-none"
+              className="flex-1 rounded-full border border-brand-yellow/40 px-3 py-2 text-sm text-brand-yellow sm:flex-none"
             >
               Delete category
             </button>
@@ -355,7 +355,7 @@ function AdminMenuInner() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search"
-              className="w-full rounded-full border border-white/10 bg-white/5 py-1.5 pl-8 pr-3 text-sm outline-none focus:border-brand-red"
+              className="w-full rounded-full border border-white/10 bg-white/5 py-1.5 pl-8 pr-3 text-sm outline-none focus:border-brand-yellow"
             />
           </form>
         </div>
@@ -461,7 +461,7 @@ function AdminMenuInner() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search"
-            className="w-full rounded-full border border-white/10 bg-white/5 py-1.5 pl-8 pr-3 text-sm outline-none focus:border-brand-red sm:py-2 sm:pl-10"
+            className="w-full rounded-full border border-white/10 bg-white/5 py-1.5 pl-8 pr-3 text-sm outline-none focus:border-brand-yellow sm:py-2 sm:pl-10"
           />
         </form>
       </div>

@@ -87,7 +87,7 @@ function MenuPageInner() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search"
-            className="w-full rounded-full border border-white/10 bg-white/5 py-1.5 pl-8 pr-3 text-sm outline-none focus:border-brand-red sm:py-2 sm:pl-10"
+            className="w-full rounded-full border border-white/10 bg-white/5 py-1.5 pl-8 pr-3 text-sm outline-none focus:border-brand-yellow sm:py-2 sm:pl-10"
           />
         </form>
       </div>

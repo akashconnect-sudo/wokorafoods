@@ -37,7 +37,7 @@ function ResetForm() {
             placeholder="New password"
             autoComplete="new-password"
           />
-          {error && <p className="break-words text-sm text-brand-red">{error}</p>}
+          {error && <p className="break-words text-sm text-brand-yellow">{error}</p>}
           <button className="btn-glow w-full py-3">Update password</button>
         </form>
       </div>

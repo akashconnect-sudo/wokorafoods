@@ -110,7 +110,7 @@ export default function AboutPage() {
   return (
     <div>
       <section className="dark-band relative overflow-hidden">
-        <div className="pointer-events-none absolute -left-24 top-8 h-72 w-72 rounded-full bg-brand-red/20 blur-3xl" />
+        <div className="pointer-events-none absolute -left-24 top-8 h-72 w-72 rounded-full bg-brand-yellow/20 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-brand-gold/10 blur-3xl" />
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:py-16">
@@ -274,7 +274,7 @@ export default function AboutPage() {
               transition={{ delay: index * 0.05 }}
               className="card-surface flex gap-4 p-5 sm:p-6"
             >
-              <p className="font-display text-3xl font-extrabold text-brand-red">{String(index + 1).padStart(2, "0")}</p>
+              <p className="font-display text-3xl font-extrabold text-brand-yellow">{String(index + 1).padStart(2, "0")}</p>
               <div>
                 <step.icon className="h-5 w-5 text-brand-gold" />
                 <h3 className="mt-2 font-display text-xl font-semibold">{step.title}</h3>
@@ -310,17 +310,17 @@ export default function AboutPage() {
           <CafeMap address={address} mapSrc={mapSrc} className="min-h-[280px] sm:min-h-[360px]" />
           <div className="space-y-5 p-5 sm:p-8 md:p-12">
             <p className="flex gap-3 text-brand-cream/80">
-              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-red" />
+              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-yellow" />
               {address}
             </p>
             <p className="flex gap-3 text-brand-cream/80">
-              <Phone className="mt-0.5 h-5 w-5 shrink-0 text-brand-red" />
+              <Phone className="mt-0.5 h-5 w-5 shrink-0 text-brand-yellow" />
               <a href={`tel:${BRAND.phone.replace(/\s/g, "")}`} className="hover:text-brand-gold">
                 {BRAND.phone}
               </a>
             </p>
             <div className="flex gap-3 text-brand-cream/80">
-              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-brand-red" />
+              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-brand-yellow" />
               <div>
                 {BRAND.hours.map((row) => (
                   <p key={row.day}>

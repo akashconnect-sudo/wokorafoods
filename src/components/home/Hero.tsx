@@ -16,7 +16,7 @@ export function Hero() {
         className="object-cover"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black/30" />
-      <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-brand-red/30 blur-3xl" />
+      <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-brand-yellow/30 blur-3xl" />
       <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-brand-gold/20 blur-3xl" />
 
       <div className="relative mx-auto flex min-h-[78svh] max-w-7xl flex-col justify-center page-pad py-14 xs:py-16 sm:min-h-[85svh] sm:py-24 lg:min-h-[92vh]">

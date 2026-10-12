@@ -53,7 +53,7 @@ export function MobileBottomNav() {
                 <tab.icon className="h-5 w-5" />
                 {tab.label}
                 {tab.href === "/cart" && count > 0 && (
-                  <span className="absolute right-1/4 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-brand-red px-1 text-[9px] font-bold text-white">
+                  <span className="absolute right-1/4 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-brand-yellow px-1 text-[9px] font-bold text-white">
                     {count}
                   </span>
                 )}

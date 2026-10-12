@@ -90,7 +90,7 @@ export default function SettingsPage() {
           <input
             value={form.name}
             onChange={(event) => setForm({ ...form, name: event.target.value })}
-            className="mt-2 w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-red"
+            className="mt-2 w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-yellow"
           />
         </label>
         <label className="block text-sm">
@@ -99,7 +99,7 @@ export default function SettingsPage() {
             type="email"
             value={form.email}
             onChange={(event) => setForm({ ...form, email: event.target.value })}
-            className="mt-2 w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-red"
+            className="mt-2 w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-yellow"
           />
         </label>
         <label className="block text-sm">
@@ -109,7 +109,7 @@ export default function SettingsPage() {
             value={form.password}
             onChange={(event) => setForm({ ...form, password: event.target.value })}
             placeholder="Leave blank to keep current"
-            className="mt-2 w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-red"
+            className="mt-2 w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 outline-none focus:border-brand-yellow"
           />
         </label>
         {message && <p className="text-sm text-brand-gold">{message}</p>}

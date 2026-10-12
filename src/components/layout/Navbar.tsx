@@ -58,8 +58,8 @@ export function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium tracking-wide ${
-                pathname === link.href ? "text-brand-red" : "text-brand-cream/75 hover:text-brand-red"
+              className={`text-sm font-medium tracking-wide transition ${
+                pathname === link.href ? "text-brand-yellow" : "text-brand-cream/75 hover:text-brand-yellow"
               }`}
             >
               {link.label}
@@ -67,10 +67,10 @@ export function Navbar() {
           ))}
           {session?.user.role === "customer" && (
             <>
-              <Link href="/account" className={`hidden text-sm lg:inline ${pathname === "/account" ? "text-brand-red" : "text-brand-cream/75"}`}>
+              <Link href="/account" className={`hidden text-sm transition lg:inline ${pathname === "/account" ? "text-brand-yellow" : "text-brand-cream/75 hover:text-brand-yellow"}`}>
                 Order
               </Link>
-              <Link href="/account/support" className="hidden text-sm text-brand-cream/75 hover:text-brand-red lg:inline">
+              <Link href="/account/support" className="hidden text-sm text-brand-cream/75 transition hover:text-brand-yellow lg:inline">
                 Support
               </Link>
             </>
@@ -80,17 +80,22 @@ export function Navbar() {
           <button
             type="button"
             onClick={toggleFestive}
-            className={`hidden rounded-full p-2 md:grid ${festive ? "text-brand-gold" : "text-brand-cream/70"}`}
+            className={`hidden rounded-full p-2 transition md:grid ${
+              festive
+                ? "bg-brand-yellow/10 text-brand-yellow shadow-[0_0_14px_rgba(255,200,0,0.45)]"
+                : "text-brand-cream/70 hover:text-brand-yellow"
+            }`}
             aria-label="Toggle festive theme"
+            aria-pressed={festive}
           >
             <Sparkles className="h-5 w-5" />
           </button>
           <NotificationBell />
           {session?.user.role !== "admin" && (
-          <Link href="/cart" className="relative rounded-full p-2 text-brand-cream hover:text-brand-red">
+          <Link href="/cart" className="relative rounded-full p-2 text-brand-cream transition hover:text-brand-yellow">
             <ShoppingBag className="h-5 w-5" />
             {count > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-brand-red px-1 text-[10px] font-bold">
+              <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-brand-yellow px-1 text-[10px] font-bold text-black">
                 {count}
               </span>
             )}
@@ -100,17 +105,17 @@ export function Navbar() {
             <div className="hidden items-center gap-2 md:flex">
               <Link
                 href={session.user.role === "admin" ? "/admin" : "/account"}
-                className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-sm text-brand-cream hover:border-brand-red/50"
+                className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-sm text-brand-cream transition hover:border-brand-yellow/50"
               >
                 <UserRound className="h-4 w-4" />
                 <span className="hidden lg:inline">{session.user.name?.split(" ")[0]}</span>
               </Link>
-              <LogoutButton className="rounded-full border border-brand-red/40 px-3 py-1.5 text-sm text-brand-red hover:bg-brand-red/10" />
+              <LogoutButton className="rounded-full border border-brand-yellow/40 px-3 py-1.5 text-sm text-brand-yellow hover:bg-brand-yellow/10" />
             </div>
           ) : (
             <Link
               href="/login"
-              className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-sm text-brand-cream hover:border-brand-red/50 md:flex"
+              className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-sm text-brand-cream transition hover:border-brand-yellow/50 hover:text-brand-yellow md:flex"
             >
               <UserRound className="h-4 w-4" />
               Login
@@ -155,8 +160,8 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className={`rounded-full px-4 py-3 text-base ${
-                  pathname === link.href ? "bg-brand-red/90 text-white shadow-neon" : "text-white/90"
+                className={`rounded-full px-4 py-3 text-base font-medium ${
+                  pathname === link.href ? "bg-brand-yellow text-black shadow-neon" : "text-white/90"
                 }`}
               >
                 {link.label}
@@ -191,15 +196,18 @@ export function Navbar() {
             <button
               type="button"
               onClick={toggleFestive}
-              className={`flex w-full items-center gap-2 rounded-full px-4 py-3 text-left ${festive ? "text-brand-gold" : "text-white/70"}`}
+              aria-pressed={festive}
+              className={`flex w-full items-center gap-2 rounded-full px-4 py-3 text-left transition ${
+                festive ? "bg-brand-yellow/10 text-brand-yellow" : "text-white/70"
+              }`}
             >
               <Sparkles className="h-4 w-4" />
               Festive theme
             </button>
             {session ? (
-              <LogoutButton className="w-full rounded-full border border-brand-red/40 bg-black/20 px-4 py-2.5 text-left text-brand-red" />
+              <LogoutButton className="w-full rounded-full border border-brand-yellow/40 bg-black/20 px-4 py-2.5 text-left text-brand-yellow" />
             ) : (
-              <Link href="/login" onClick={() => setOpen(false)} className="block rounded-full bg-brand-red px-4 py-2.5 text-center font-semibold">
+              <Link href="/login" onClick={() => setOpen(false)} className="block rounded-full bg-brand-yellow px-4 py-2.5 text-center font-semibold text-black">
                 Login
               </Link>
             )}

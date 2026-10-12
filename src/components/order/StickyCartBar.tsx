@@ -32,7 +32,7 @@ export function StickyCartBar() {
       >
         <Link
           href="/cart"
-          className="pointer-events-auto mx-auto flex max-w-xl items-center justify-between gap-3 rounded-full bg-brand-red px-4 py-3 text-white shadow-[0_12px_40px_rgba(232,39,44,0.45)] sm:px-5"
+          className="pointer-events-auto mx-auto flex max-w-xl items-center justify-between gap-3 rounded-full bg-brand-yellow px-4 py-3 text-white shadow-[0_12px_40px_rgba(232,39,44,0.45)] sm:px-5"
         >
           <span className="min-w-0 truncate text-sm font-medium">
             {count} {count === 1 ? "item" : "items"} · {formatINR(total)}

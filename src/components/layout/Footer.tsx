@@ -10,6 +10,8 @@ import { BRAND, CATEGORY_META } from "@/lib/constants";
 import { useCafeAddress } from "@/hooks/useCafeAddress";
 import { useCartAccess } from "@/hooks/useCartAccess";
 
+const INSTAGRAM_URL = "https://www.instagram.com/wokorafood";
+
 function SocialIcon({
   name,
   className,
@@ -77,27 +79,27 @@ export function Footer() {
   if (pathname === "/account") return null;
 
   return (
-    <footer className="relative overflow-hidden border-t border-brand-red/30 bg-[#090909]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-gold to-transparent" />
-      <div className="pointer-events-none absolute -left-24 top-10 h-64 w-64 rounded-full bg-brand-red/15 blur-3xl" />
-      <div className="pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-brand-gold/10 blur-3xl" />
+    <footer className="relative overflow-hidden border-t border-brand-yellow/30 bg-[#090909]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-yellow to-transparent" />
+      <div className="pointer-events-none absolute -left-24 top-10 h-64 w-64 rounded-full bg-white/[0.03] blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-white/[0.03] blur-3xl" />
 
       <div className="relative mx-auto max-w-7xl page-pad py-10 sm:py-16">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-lg">
             <Logo />
-            <p className="mt-4 font-wall text-2xl text-brand-gold sm:text-3xl">{BRAND.subTagline}</p>
+            <p className="mt-4 font-wall text-2xl text-brand-yellow sm:text-3xl">{BRAND.subTagline}</p>
             <p className="mt-2 max-w-sm text-sm text-brand-cream/70">{BRAND.tagline} Booth-side ordering. Kitchen prints the ticket.</p>
           </div>
-          <div className="rounded-3xl border border-brand-gold/35 bg-brand-gold/5 px-5 py-4 sm:min-w-[240px]">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">
+          <div className="rounded-3xl border border-brand-yellow/35 bg-brand-yellow/5 px-5 py-4 sm:min-w-[240px]">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-yellow">
               <Clock className="h-4 w-4" /> Open tonight
             </p>
             <div className="mt-3 space-y-1 text-sm text-brand-cream/80">
               {BRAND.hours.map((row) => (
                 <p key={row.day} className="flex items-baseline justify-between gap-4">
                   <span className="text-white">{row.day.split("–")[0].trim()}</span>
-                  <span className="shrink-0 text-brand-gold">{row.time}</span>
+                  <span className="shrink-0 text-brand-yellow">{row.time}</span>
                 </p>
               ))}
             </div>
@@ -111,7 +113,7 @@ export function Footer() {
               <MenuJump
                 key={category.slug}
                 slug={category.slug}
-                className="group overflow-hidden rounded-2xl border border-white/10 bg-black/40"
+                className="group overflow-hidden rounded-2xl border border-white/10 bg-black/40 transition hover:border-brand-yellow/50"
               >
                 <span className="relative block aspect-square">
                   <Image
@@ -135,47 +137,65 @@ export function Footer() {
         <div className="mt-10 grid gap-8 border-t border-white/10 pt-10 lg:grid-cols-2 lg:items-start lg:gap-14">
           <div className="grid gap-8 sm:grid-cols-2 sm:gap-10">
           <div className="space-y-3 text-sm text-brand-cream/75">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-gold">Visit</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-yellow">Visit</p>
             <p className="flex items-start gap-2">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-red" />
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
               {address}
             </p>
-            <a href={`tel:${BRAND.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 hover:text-brand-gold">
-              <Phone className="h-4 w-4 text-brand-red" />
+            <a href={`tel:${BRAND.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 transition hover:text-brand-yellow">
+              <Phone className="h-4 w-4 text-brand-yellow" />
               {BRAND.phone}
             </a>
-            <a href={`mailto:${BRAND.email}`} className="flex min-w-0 items-center gap-2 break-all hover:text-brand-gold">
-              <Mail className="h-4 w-4 shrink-0 text-brand-red" />
+            <a href={`mailto:${BRAND.email}`} className="flex min-w-0 items-center gap-2 break-all transition hover:text-brand-yellow">
+              <Mail className="h-4 w-4 shrink-0 text-brand-yellow" />
               {BRAND.email}
             </a>
             <div className="flex gap-2 pt-1">
-              <a href={BRAND.social.instagram} aria-label="Instagram" className="grid h-10 w-10 place-items-center rounded-full border border-white/15 hover:border-brand-gold hover:text-brand-gold">
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Wokora Food on Instagram"
+                className="grid h-10 w-10 place-items-center rounded-full border border-white/15 transition hover:border-brand-yellow hover:text-brand-yellow"
+              >
                 <SocialIcon name="instagram" className="h-4 w-4" />
               </a>
-              <a href={BRAND.social.facebook} aria-label="Facebook" className="grid h-10 w-10 place-items-center rounded-full border border-white/15 hover:border-brand-gold hover:text-brand-gold">
+              <a
+                href={BRAND.social.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="grid h-10 w-10 place-items-center rounded-full border border-white/15 transition hover:border-brand-yellow hover:text-brand-yellow"
+              >
                 <SocialIcon name="facebook" className="h-4 w-4" />
               </a>
-              <a href={BRAND.social.twitter} aria-label="X" className="grid h-10 w-10 place-items-center rounded-full border border-white/15 hover:border-brand-gold hover:text-brand-gold">
+              <a
+                href={BRAND.social.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="X"
+                className="grid h-10 w-10 place-items-center rounded-full border border-white/15 transition hover:border-brand-yellow hover:text-brand-yellow"
+              >
                 <SocialIcon name="x" className="h-4 w-4" />
               </a>
             </div>
           </div>
 
           <nav className="text-sm text-brand-cream/75">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-gold">Explore</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-yellow">Explore</p>
             <div className="mt-3 flex flex-col gap-2.5">
-              <Link href="/menu" className="hover:text-brand-gold">Full menu</Link>
-              <Link href={isAdmin ? "/admin" : "/account"} className="hover:text-brand-gold">
+              <Link href="/menu" className="transition hover:text-brand-yellow">Full menu</Link>
+              <Link href={isAdmin ? "/admin" : "/account"} className="transition hover:text-brand-yellow">
                 {isAdmin ? "Kitchen" : "Order"}
               </Link>
-              <Link href="/about" className="hover:text-brand-gold">Our story</Link>
-              <Link href="/#visit" className="hover:text-brand-gold">Visit</Link>
+              <Link href="/about" className="transition hover:text-brand-yellow">Our story</Link>
+              <Link href="/#visit" className="transition hover:text-brand-yellow">Visit</Link>
               {isAdmin ? (
-                <Link href="/admin/kiosk" className="hover:text-brand-gold">Print kiosk</Link>
+                <Link href="/admin/kiosk" className="transition hover:text-brand-yellow">Print kiosk</Link>
               ) : (
-                <Link href="/cart" className="hover:text-brand-gold">Cart</Link>
+                <Link href="/cart" className="transition hover:text-brand-yellow">Cart</Link>
               )}
-              <Link href={isAdmin ? "/admin/settings" : "/account/support"} className="hover:text-brand-gold">
+              <Link href={isAdmin ? "/admin/settings" : "/account/support"} className="transition hover:text-brand-yellow">
                 {isAdmin ? "Settings" : "Support"}
               </Link>
             </div>
@@ -190,11 +210,11 @@ export function Footer() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@email.com"
-                className="w-full rounded-full border border-white/10 bg-black/40 px-4 py-2.5 text-sm outline-none focus:border-brand-red"
+                className="w-full rounded-full border border-white/10 bg-black/40 px-4 py-2.5 text-sm outline-none focus:border-brand-yellow"
               />
               <button className="btn-glow shrink-0 px-5 py-2.5 text-sm">Join</button>
             </div>
-            {message && <p className="mt-2 text-xs text-brand-gold">{message}</p>}
+            {message && <p className="mt-2 text-xs text-brand-yellow">{message}</p>}
             <div className="mt-4 flex items-center justify-between gap-4 border-t border-white/10 pt-3">
               <Image src="/images/brand/fssai.svg" alt="FSSAI" width={96} height={36} unoptimized className="h-8 w-auto sm:h-9" />
               <p className="shrink-0 font-display text-xs tabular-nums tracking-[0.16em] text-[#E87722] sm:text-sm">

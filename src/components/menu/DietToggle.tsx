@@ -31,7 +31,7 @@ export function DietToggle({
                 ? option.id === "veg"
                   ? "border-green-400 bg-green-500/15 shadow-[0_0_16px_rgba(74,222,128,0.22)]"
                   : option.id === "nonveg"
-                    ? "border-brand-red bg-brand-red/15 shadow-neon"
+                    ? "border-brand-yellow bg-brand-yellow/15 shadow-neon"
                     : "border-brand-gold bg-brand-gold/10"
                 : "border-white/10 bg-white/5"
             }`}

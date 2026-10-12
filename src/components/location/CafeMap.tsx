@@ -26,7 +26,7 @@ export function CafeMap({
         href={googleMapsLink(address)}
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute bottom-3 right-3 rounded-full bg-black/80 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-red"
+        className="absolute bottom-3 right-3 rounded-full bg-black/80 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-yellow"
       >
         Open in Maps
       </a>
