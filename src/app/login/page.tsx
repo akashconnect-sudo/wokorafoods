@@ -68,13 +68,7 @@ function LoginForm() {
       return;
     }
     const session = await getSession();
-    if (session?.user.role === "admin") {
-      router.push("/admin");
-    } else if (callbackUrl.startsWith("http")) {
-      router.push("/account");
-    } else {
-      router.push(callbackUrl);
-    }
+    router.push(session?.user.role === "admin" ? "/admin" : "/");
     router.refresh();
   };
 
@@ -138,7 +132,7 @@ function LoginForm() {
           >
             {useOtp ? "Use password instead" : "Use email OTP instead"}
           </button>
-          <GoogleAuthButton callbackUrl={callbackUrl} />
+          <GoogleAuthButton callbackUrl="/" />
           <div className="mt-4 flex flex-col gap-3 text-sm text-brand-cream/70 xs:flex-row xs:items-center xs:justify-between">
             <button type="button" onClick={() => setForgotOpen(true)} className="min-h-11 text-left hover:text-brand-gold xs:min-h-0">
               Forgot password

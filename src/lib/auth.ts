@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
@@ -11,6 +12,12 @@ import { loginKitchenAdmin } from "./kitchenAdmin";
 
 function kitchenAdminEmail() {
   return process.env.KITCHEN_ADMIN_EMAIL?.trim().toLowerCase() || "";
+}
+
+function googlePhone(email: string) {
+  const hash = createHash("sha256").update(email).digest("hex");
+  const digits = BigInt(`0x${hash.slice(0, 12)}`).toString().padStart(9, "0").slice(0, 9);
+  return `8${digits}`;
 }
 
 function sessionUser(user: {
@@ -100,34 +107,56 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider !== "google" || !user.email) return true;
+      if (account?.provider !== "google") return true;
+      if (!user.email) return false;
 
       const email = user.email.toLowerCase();
       const isKitchen = kitchenAdminEmail() === email;
-      const existing = await prisma.user.findUnique({ where: { email } });
-      if (!existing) {
+
+      try {
         await ensureDefaultStore();
+        const existing = await prisma.user.findUnique({ where: { email } });
+        if (existing) {
+          await prisma.user.update({
+            where: { id: existing.id },
+            data: {
+              emailVerified: true,
+              name: existing.name || user.name || "Wokora Guest",
+              ...(isKitchen ? { role: "admin" as const } : {}),
+            },
+          });
+          return true;
+        }
+
         await prisma.user.create({
           data: {
             name: user.name || "Wokora Guest",
             email,
-            phone: `g${String(user.id || Date.now()).replace(/\D/g, "").slice(-10).padStart(10, "0")}`,
+            phone: googlePhone(email),
             passwordHash: await bcrypt.hash(crypto.randomUUID(), 10),
             role: isKitchen ? "admin" : "customer",
             emailVerified: true,
             storeId: DEFAULT_STORE_ID,
           },
         });
-      } else {
-        await prisma.user.update({
-          where: { id: existing.id },
-          data: {
-            emailVerified: true,
-            ...(isKitchen ? { role: "admin" as const } : {}),
-          },
-        });
+        return true;
+      } catch (error) {
+        console.error("[google-signin]", error);
+        const linked = await prisma.user.findUnique({ where: { email } }).catch(() => null);
+        return Boolean(linked);
       }
-      return true;
+    },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) {
+        if (url.startsWith("/login") || url.startsWith("/admin")) return `${baseUrl}${url}`;
+        return `${baseUrl}/`;
+      }
+      if (url.startsWith(baseUrl)) {
+        const path = url.slice(baseUrl.length) || "/";
+        if (path.startsWith("/login") || path.startsWith("/admin")) return url;
+        return `${baseUrl}/`;
+      }
+      return `${baseUrl}/`;
     },
     async jwt({ token, user }) {
       const email = (user?.email || token.email || "").toString().toLowerCase();

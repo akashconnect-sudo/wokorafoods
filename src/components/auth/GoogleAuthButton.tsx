@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 
-export function GoogleAuthButton({ callbackUrl = "/account" }: { callbackUrl?: string }) {
+export function GoogleAuthButton({ callbackUrl = "/" }: { callbackUrl?: string }) {
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {

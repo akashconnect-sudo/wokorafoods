@@ -95,7 +95,7 @@ export default function SignupPage() {
       redirect: false,
     });
     setLoading(false);
-    router.push("/account");
+    router.push("/");
     router.refresh();
   };
 
