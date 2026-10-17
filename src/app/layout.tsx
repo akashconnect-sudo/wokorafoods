@@ -43,8 +43,11 @@ export const metadata: Metadata = {
     "order food online",
   ],
   icons: {
-    icon: [{ url: "/images/brand/icon.webp", type: "image/webp" }],
-    shortcut: "/images/brand/icon.webp",
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/favicon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: "/favicon.ico",
     apple: "/images/brand/apple-icon.webp",
   },
   openGraph: {
