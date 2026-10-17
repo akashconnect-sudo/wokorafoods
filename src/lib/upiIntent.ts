@@ -1,5 +1,4 @@
 import QRCode from "qrcode";
-import { displayOrderNumber } from "@/lib/constants";
 import { publicPayeeName, settlementVpa } from "@/lib/payoutAccount";
 import {
   UPI_APPS,
@@ -14,12 +13,12 @@ import {
 export function buildOrderUpiQuery(order: { id: string; serialNumber: number; totalAmount: number }) {
   const vpa = settlementVpa();
   if (!isValidUpiVpa(vpa)) return "";
+  const bill = order.serialNumber ? String(order.serialNumber).padStart(3, "0") : "order";
   return buildUpiQuery({
     vpa,
     payeeName: publicPayeeName(),
     amount: order.totalAmount,
-    note: `Wokora ${displayOrderNumber(order.serialNumber)}`,
-    txnRef: order.id.replace(/[^a-zA-Z0-9]/g, "").slice(0, 35),
+    note: `Wokora ${bill}`,
   });
 }
 

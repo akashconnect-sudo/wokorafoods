@@ -37,22 +37,33 @@ export function upiAmount(rupees: number) {
   return Math.max(1, Math.round(rupees)).toFixed(2);
 }
 
+/** UPI apps reject a payee VPA when @ is encoded as %40, and they reject + for spaces. */
+function encodeUpiValue(value: string) {
+  return encodeURIComponent(value).replace(/%40/gi, "@");
+}
+
+function upiText(value: string, fallback: string, max: number) {
+  const cleaned = value.replace(/[^\w\s.&-]/g, " ").replace(/\s+/g, " ").trim();
+  return (cleaned || fallback).slice(0, max);
+}
+
 export function buildUpiQuery(options: {
   vpa: string;
   payeeName: string;
   amount: number;
   note: string;
-  txnRef?: string;
 }) {
-  const params = new URLSearchParams({
+  const fields = {
     pa: normalizeUpiVpa(options.vpa),
-    pn: options.payeeName.slice(0, 99) || "Wokora Foods",
+    pn: upiText(options.payeeName, "Wokora Foods", 99),
     am: upiAmount(options.amount),
     cu: "INR",
-    tn: options.note.slice(0, 50),
-  });
-  if (options.txnRef) params.set("tr", options.txnRef.slice(0, 35));
-  return params.toString();
+    mc: "0000",
+    tn: upiText(options.note, "Wokora Foods", 50),
+  };
+  return Object.entries(fields)
+    .map(([key, value]) => `${key}=${encodeUpiValue(value)}`)
+    .join("&");
 }
 
 /** Generic intent — Android shows every installed UPI app. */
