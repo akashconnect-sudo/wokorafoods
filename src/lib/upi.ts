@@ -58,7 +58,6 @@ export function buildUpiQuery(options: {
     pn: upiText(options.payeeName, "Wokora Foods", 99),
     am: upiAmount(options.amount),
     cu: "INR",
-    mc: "0000",
     tn: upiText(options.note, "Wokora Foods", 50),
   };
   return Object.entries(fields)
@@ -69,6 +68,21 @@ export function buildUpiQuery(options: {
 /** Generic intent — Android shows every installed UPI app. */
 export function upiPayUri(query: string) {
   return `upi://pay?${query}`;
+}
+
+const ANDROID_UPI_PACKAGES: Record<Exclude<UpiAppId, "any">, string> = {
+  gpay: "com.google.android.apps.nbu.paisa.user",
+  phonepe: "com.phonepe.app",
+  paytm: "net.one97.paytm",
+  bhim: "in.org.npci.upiapp",
+  amazonpay: "in.amazon.mShop.android.shopping",
+  cred: "com.dreamplug.androidapp",
+  mobikwik: "com.mobikwik_new",
+};
+
+/** Opens one installed Android app with a normal upi://pay request. */
+export function androidUpiIntent(query: string, appId: Exclude<UpiAppId, "any">) {
+  return `intent://pay?${query}#Intent;scheme=upi;package=${ANDROID_UPI_PACKAGES[appId]};end`;
 }
 
 export function upiAppUri(appId: UpiAppId, query: string) {

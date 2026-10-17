@@ -51,10 +51,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
   const ios = /iPhone|iPad|iPod/i.test(request.headers.get("user-agent") || "");
   const uri = upiOpenUri(query, app, ios);
 
-  return new NextResponse(null, {
-    status: 302,
+  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><title>Pay Wokora Foods</title></head><body><p>Opening your UPI app...</p><script>location.replace(${JSON.stringify(uri)});</script></body></html>`;
+  return new NextResponse(html, {
+    status: 200,
     headers: {
-      Location: uri,
+      "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "no-store",
     },
   });

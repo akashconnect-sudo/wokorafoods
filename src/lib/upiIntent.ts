@@ -3,6 +3,7 @@ import { publicPayeeName, settlementVpa } from "@/lib/payoutAccount";
 import {
   UPI_APPS,
   type UpiAppId,
+  androidUpiIntent,
   buildUpiQuery,
   gpayFallbackUri,
   isValidUpiVpa,
@@ -25,8 +26,8 @@ export function buildOrderUpiQuery(order: { id: string; serialNumber: number; to
 export function upiOpenUri(query: string, appId: string, ios: boolean) {
   const id = (UPI_APPS.some((app) => app.id === appId) ? appId : "any") as UpiAppId | "any";
   if (id === "any") return upiPayUri(query);
-  if (id === "gpay" && ios) return gpayFallbackUri(query);
-  return upiAppUri(id, query);
+  if (ios) return id === "gpay" ? gpayFallbackUri(query) : upiAppUri(id, query);
+  return androidUpiIntent(query, id);
 }
 
 export async function upiQrDataUrl(query: string) {
