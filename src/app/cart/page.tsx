@@ -5,20 +5,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
-import { GST_RATE, TABLE_COUNT, formatINR } from "@/lib/constants";
+import { GST_RATE, displayOrderNumber, formatINR } from "@/lib/constants";
 import { cartSubtotal, useCartStore } from "@/store/cartStore";
 import { useCartAccess } from "@/hooks/useCartAccess";
 import { userFacingError } from "@/lib/publicError";
+import { openRazorpayCheckout } from "@/lib/razorpayCheckout";
 
 export default function CartPage() {
   const router = useRouter();
   const { status, isAdmin, canUseCart } = useCartAccess();
-  const { items, increment, decrement, removeItem, tableNumber, setTableNumber, orderType, setOrderType, clear } =
-    useCartStore();
+  const { items, increment, decrement, removeItem, orderType, setOrderType, clear } = useCartStore();
   const [notes, setNotes] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"upi" | "card" | "cash">("upi");
+  const [paymentMethod, setPaymentMethod] = useState<"upi" | "cash">("upi");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cashOrder, setCashOrder] = useState<{ id: string; serialNumber: number; totalAmount: number; paymentStatus: string } | null>(null);
 
   const subtotal = cartSubtotal(items);
   const tax = Math.round(subtotal * GST_RATE);
@@ -28,13 +29,33 @@ export default function CartPage() {
     if (isAdmin) router.replace("/admin");
   }, [isAdmin, router]);
 
+  useEffect(() => {
+    if (!cashOrder || cashOrder.paymentStatus === "paid") return;
+    const load = () => {
+      fetch(`/api/orders/${cashOrder.id}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!data?.order) return;
+          setCashOrder((current) =>
+            current
+              ? {
+                  ...current,
+                  paymentStatus: data.order.paymentStatus,
+                  totalAmount: data.order.totalAmount,
+                  serialNumber: data.order.serialNumber,
+                }
+              : current
+          );
+        })
+        .catch(() => undefined);
+    };
+    const timer = setInterval(load, 3000);
+    return () => clearInterval(timer);
+  }, [cashOrder?.id, cashOrder?.paymentStatus]);
+
   const placeOrder = async () => {
     if (!canUseCart) {
       router.push("/login?callbackUrl=/cart");
-      return;
-    }
-    if (orderType === "dine_in" && !tableNumber) {
-      setError("Select your table number so the counter can print to the right bill.");
       return;
     }
     setLoading(true);
@@ -45,7 +66,6 @@ export default function CartPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: orderType,
-          tableNumber,
           notes,
           paymentMethod,
           items: items.map((item) => ({
@@ -62,7 +82,21 @@ export default function CartPage() {
         return;
       }
       clear();
-      router.push(paymentMethod === "cash" ? `/order/${data.order.id}` : `/pay/${data.order.id}`);
+      if (paymentMethod === "cash") {
+        setCashOrder({
+          id: data.order.id,
+          serialNumber: data.order.serialNumber,
+          totalAmount: data.order.totalAmount,
+          paymentStatus: data.order.paymentStatus || "pay_at_counter",
+        });
+        return;
+      }
+      try {
+        await openRazorpayCheckout(data.order.id);
+      } catch {
+        // Order is already saved. The bill page can open Razorpay again.
+      }
+      router.push(`/order/${data.order.id}`);
     } catch {
       setError(userFacingError("Network error. Check the connection and try again."));
     } finally {
@@ -92,13 +126,39 @@ export default function CartPage() {
     );
   }
 
-  if (items.length === 0) {
+  if (items.length === 0 && !cashOrder) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-20 text-center">
         <h1 className="font-display text-3xl font-bold">Your tray is empty</h1>
           <Link href="/menu" className="btn-glow mt-6 inline-block px-6 py-3">
           Browse menu
         </Link>
+      </div>
+    );
+  }
+
+  if (items.length === 0 && cashOrder) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-4">
+        <div className="card-surface w-full max-w-md rounded-t-3xl border-b-0 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:rounded-2xl sm:border sm:p-6">
+          <p className="font-display text-xl font-bold sm:text-2xl">
+            {cashOrder.paymentStatus === "paid" ? "Paid" : "Pay at the counter"}
+          </p>
+          <p className="mt-2 font-display text-3xl text-brand-gold sm:text-4xl">{displayOrderNumber(cashOrder.serialNumber)}</p>
+          <p className="mt-2 text-brand-gold">{formatINR(cashOrder.totalAmount)}</p>
+          <p className="mt-3 text-sm text-brand-cream/70">
+            {cashOrder.paymentStatus === "paid"
+              ? "The kitchen confirmed this cash payment."
+              : "Hand the cash to the counter. This stays here until the kitchen marks it paid."}
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push(`/order/${cashOrder.id}`)}
+            className="btn-glow mt-6 w-full py-3"
+          >
+            {cashOrder.paymentStatus === "paid" ? "View order" : "View bill"}
+          </button>
+        </div>
       </div>
     );
   }
@@ -152,29 +212,14 @@ export default function CartPage() {
             </button>
           ))}
         </div>
-        {orderType === "dine_in" && (
-          <label className="mt-4 block text-sm">
-            Table number
-            <select
-              value={tableNumber}
-              onChange={(event) => setTableNumber(event.target.value)}
-              className="mt-2 w-full rounded-full border border-white/10 bg-ink px-4 py-2.5"
-            >
-              <option value="">Select table</option>
-              {Array.from({ length: TABLE_COUNT }, (_, index) => String(index + 1)).map((table) => (
-                <option key={table} value={table}>
-                  Table {table}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+        {orderType === "dine_in" ? (
+          <p className="mt-4 text-sm text-brand-cream/60">Kitchen will assign your table after the order is placed.</p>
+        ) : null}
         <div className="mt-4">
           <p className="text-sm">Payment</p>
-          <div className="mt-2 grid grid-cols-3 gap-2 text-xs sm:text-sm">
+          <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
             {([
               ["upi", "UPI"],
-              ["card", "Card"],
               ["cash", "Cash"],
             ] as const).map(([value, label]) => (
               <button
@@ -187,11 +232,6 @@ export default function CartPage() {
               </button>
             ))}
           </div>
-          {paymentMethod === "upi" ? (
-            <p className="mt-2 text-xs text-brand-cream/50">
-              Next screen opens GPay, PhonePe, Paytm, BHIM, and every other UPI app on the phone.
-            </p>
-          ) : null}
         </div>
         <textarea
           value={notes}

@@ -33,7 +33,7 @@ export const orderSchema = z.object({
   tableNumber: z.string().min(1, "Table number is required for dine-in").optional(),
   type: z.enum(["dine_in", "takeaway"]),
   notes: z.string().max(240).optional(),
-  paymentMethod: z.enum(["upi", "card", "cash"]).optional(),
+  paymentMethod: z.enum(["upi", "cash"]).optional(),
   items: z
     .array(
       z.object({

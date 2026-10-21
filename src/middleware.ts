@@ -8,7 +8,6 @@ export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const isKitchen = path === "/admin" || path.startsWith("/admin/");
   const isAccount = path === "/account" || path.startsWith("/account/");
-  const isPay = path === "/pay" || path.startsWith("/pay/");
 
   if (isKitchen) {
     if (!token?.id) {
@@ -22,7 +21,7 @@ export async function middleware(req: NextRequest) {
     return withSecurityHeaders(NextResponse.next());
   }
 
-  if (isAccount || isPay) {
+  if (isAccount) {
     if (!token?.id) {
       const login = new URL("/login", req.url);
       login.searchParams.set("callbackUrl", path);
@@ -42,8 +41,6 @@ export const config = {
     "/admin/:path*",
     "/account",
     "/account/:path*",
-    "/pay",
-    "/pay/:path*",
     "/((?!_next/static|_next/image|favicon.ico|images/).*)",
   ],
 };

@@ -1,11 +1,8 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { getSiteUrl } from "@/lib/constants";
-import { UPI_APPS } from "@/lib/upi";
-
 const PAY_METHODS = new Set(["upi", "card", "cash"]);
 const PAY_STATUSES = new Set(["pending", "paid", "failed", "pay_at_counter"]);
-const UPI_APP_IDS = new Set(["any", ...UPI_APPS.map((app) => app.id)]);
 
 const hits = new Map<string, { count: number; resetAt: number }>();
 
@@ -96,18 +93,13 @@ export function safePayStatus(value: unknown) {
   return typeof value === "string" && PAY_STATUSES.has(value) ? value : "";
 }
 
-export function safeUpiApp(value: unknown) {
-  const app = typeof value === "string" ? value : "any";
-  return UPI_APP_IDS.has(app) ? app : "any";
-}
-
 export function securityHeaders(headers: Headers) {
   headers.set("X-Frame-Options", "DENY");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-DNS-Prefetch-Control", "off");
-  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=()");
-  headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), usb=()");
+  headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   headers.set("Cross-Origin-Resource-Policy", "same-origin");
   headers.set("X-Permitted-Cross-Domain-Policies", "none");
   headers.set("Origin-Agent-Cluster", "?1");
@@ -116,15 +108,17 @@ export function securityHeaders(headers: Headers) {
     [
       "default-src 'self'",
       "base-uri 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://api.razorpay.com https://checkout.razorpay.com",
       "frame-ancestors 'none'",
       "object-src 'none'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://images.unsplash.com https://plus.unsplash.com https://images.pexels.com https://*.googleusercontent.com",
       "font-src 'self' data:",
-      "frame-src 'self' https://www.google.com https://maps.google.com https://www.google.co.in",
-      process.env.NODE_ENV === "production" ? "connect-src 'self'" : "connect-src 'self' ws: wss:",
+      "frame-src 'self' https://api.razorpay.com https://www.google.com https://maps.google.com https://www.google.co.in",
+      process.env.NODE_ENV === "production"
+        ? "connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com"
+        : "connect-src 'self' ws: wss: https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com",
       "worker-src 'self' blob:",
       ...(process.env.NODE_ENV === "production" ? ["upgrade-insecure-requests"] : []),
     ].join("; ")

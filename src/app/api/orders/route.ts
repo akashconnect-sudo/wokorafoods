@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { orderSchema } from "@/lib/validations";
-import { GST_RATE, loyaltyFromTotal } from "@/lib/constants";
+import { GST_RATE, TABLE_COUNT, loyaltyFromTotal } from "@/lib/constants";
 import { DEFAULT_STORE_ID, ensureDefaultStore } from "@/lib/store";
 import { afterOrderPlaced, type OrderPlacedEvent } from "@/lib/orderEvents";
 import { attachItemCustomizations, saveOrderItemCustomizations } from "@/lib/cartPersistence";
@@ -70,8 +70,11 @@ export async function POST(request: Request) {
   const storeId = session.user.storeId || DEFAULT_STORE_ID;
   await ensureDefaultStore();
 
-  if (type === "dine_in" && !tableNumber) {
-    return NextResponse.json({ error: "Table number is required for dine-in" }, { status: 400 });
+  if (type === "dine_in" && tableNumber) {
+    const allowed = new Set(Array.from({ length: TABLE_COUNT }, (_, index) => String(index + 1)));
+    if (!allowed.has(tableNumber)) {
+      return NextResponse.json({ error: "Choose table 1, 2, or 3" }, { status: 400 });
+    }
   }
 
   try {
@@ -116,7 +119,7 @@ export async function POST(request: Request) {
       storeId,
       serialNumber,
       userId: session.user.id,
-      tableNumber: type === "dine_in" ? tableNumber : null,
+      tableNumber: type === "dine_in" ? tableNumber || null : null,
       type,
       status: "placed",
       paymentMethod: paymentMethod || null,

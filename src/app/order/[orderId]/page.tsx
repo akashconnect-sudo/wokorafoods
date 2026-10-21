@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { brandWhatsApp, displayOrderNumber, formatINR } from "@/lib/constants";
 import { paymentMethodLabel, paymentStatusLabel } from "@/lib/orderLabels";
+import { PayOrderButton } from "@/components/order/PayOrderButton";
 
 const STEPS = ["placed", "preparing", "ready", "served"] as const;
 
@@ -83,6 +84,11 @@ export default function OrderPage() {
         Payment: {paymentStatusLabel(order.paymentStatus)}
         {order.paymentMethod ? ` · ${paymentMethodLabel(order.paymentMethod)}` : ""}
       </p>
+      {(order.paymentStatus === "pending" || order.paymentStatus === "failed") && order.paymentMethod !== "cash" ? (
+        <div className="mt-4 flex justify-center">
+          <PayOrderButton orderId={order.id} label={order.paymentStatus === "failed" ? "Retry payment" : "Pay now"} />
+        </div>
+      ) : null}
 
       <div className="mt-8 flex justify-between">
         {STEPS.map((step, index) => (
@@ -97,7 +103,14 @@ export default function OrderPage() {
 
       <article className="card-surface mt-10 p-6 font-mono text-sm">
         <p>Wokora Foods</p>
-        <p>Type: {order.type === "dine_in" ? `Dine-in · Table ${order.tableNumber}` : "Takeaway"}</p>
+        <p>
+          Type:{" "}
+          {order.type === "dine_in"
+            ? order.tableNumber
+              ? `Dine-in · Table ${order.tableNumber}`
+              : "Dine-in · Table assigning"
+            : "Takeaway"}
+        </p>
         <p className="text-brand-cream/60">{new Date(order.createdAt).toLocaleString("en-IN")}</p>
         <ul className="mt-4 space-y-2 border-y border-dashed border-white/15 py-4">
           {order.items.map((item, index) => (

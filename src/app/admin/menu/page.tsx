@@ -16,6 +16,7 @@ import {
   deleteKitchenItem,
   emptyVariation,
   fetchKitchenMenu,
+  patchKitchenCategory,
   patchKitchenItem,
   uploadKitchenPhoto,
   type KitchenCategory,
@@ -35,6 +36,7 @@ function AdminMenuInner() {
   const [draft, setDraft] = useState(emptyVariation);
   const [showAdd, setShowAdd] = useState(false);
   const [showNewCategory, setShowNewCategory] = useState(false);
+  const [showEditCategory, setShowEditCategory] = useState(false);
   const [categoryForm, setCategoryForm] = useState({ name: "", iconUrl: "" });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -156,6 +158,25 @@ function AdminMenuInner() {
     }
   };
 
+  const saveCategory = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!category) return;
+    setSaving(true);
+    try {
+      await patchKitchenCategory(category.id, {
+        name: categoryForm.name.trim(),
+        iconUrl: categoryForm.iconUrl || null,
+      });
+      setShowEditCategory(false);
+      setMessage("Category updated.");
+      await load();
+    } catch (error) {
+      saveMessage(error, "Could not save category");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   useEffect(() => {
     setForm((current) => ({ ...current, isVeg: diet !== "nonveg" }));
     setEditing(null);
@@ -169,14 +190,16 @@ function AdminMenuInner() {
           <input
             value={draft.name}
             onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-            className="rounded-full border border-white/10 bg-ink px-3 py-1.5"
+            className="field-input"
+            placeholder="Item name"
           />
           <input
             value={draft.price}
             onChange={(event) => setDraft({ ...draft, price: event.target.value })}
-            className="rounded-full border border-white/10 bg-ink px-3 py-1.5"
+            className="field-input"
+            placeholder="Price"
           />
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex min-h-11 items-center gap-2 text-sm">
             <input
               type="checkbox"
               checked={draft.isVeg}
@@ -184,26 +207,40 @@ function AdminMenuInner() {
             />
             Vegetarian
           </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={async (event) => {
-              const file = event.target.files?.[0];
-              if (!file) return;
-              try {
-                const url = await uploadKitchenPhoto(file);
-                setDraft((current) => ({ ...current, imageUrl: url }));
-              } catch (error) {
-                saveMessage(error, "Upload failed");
-              }
-            }}
-          />
+          <div className="md:col-span-2">
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+              {draft.imageUrl ? (
+                <Image src={draft.imageUrl} alt={draft.name || "Dish"} fill unoptimized className="object-cover" sizes="(max-width: 640px) 100vw, 40rem" />
+              ) : (
+                <div className="grid h-full place-items-center text-sm text-brand-cream/45">No photo yet</div>
+              )}
+            </div>
+            <label className="mt-3 inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border border-brand-gold/40 px-4 text-sm text-brand-gold sm:w-auto">
+              Change photo
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={async (event) => {
+                  const file = event.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    const url = await uploadKitchenPhoto(file);
+                    setDraft((current) => ({ ...current, imageUrl: url }));
+                  } catch (error) {
+                    saveMessage(error, "Upload failed");
+                  }
+                }}
+              />
+            </label>
+          </div>
           <textarea
             value={draft.description}
             onChange={(event) => setDraft({ ...draft, description: event.target.value })}
-            className="rounded-2xl border border-white/10 bg-ink px-3 py-1.5 md:col-span-2"
+            className="min-h-24 rounded-2xl border border-white/10 bg-ink px-3 py-2 md:col-span-2"
+            placeholder="Description"
           />
-          <div className="flex gap-2 md:col-span-2">
+          <div className="stack-actions md:col-span-2">
             <button
               type="button"
               onClick={async () => {
@@ -222,17 +259,22 @@ function AdminMenuInner() {
                   saveMessage(error, "Could not save");
                 }
               }}
-              className="btn-glow px-4 py-1.5 text-sm"
+              className="btn-glow w-full px-4 py-2.5 text-sm sm:w-auto"
             >
               Save
             </button>
-            <button type="button" onClick={() => setEditing(null)} className="text-sm">
+            <button type="button" onClick={() => setEditing(null)} className="min-h-11 text-sm">
               Cancel
             </button>
           </div>
         </div>
       ) : (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+            {item.imageUrl ? (
+              <Image src={item.imageUrl} alt="" fill unoptimized className="object-cover" />
+            ) : null}
+          </div>
           <div className="min-w-0 flex-1 text-left">
             <span className="flex items-start gap-2">
               <span
@@ -248,8 +290,8 @@ function AdminMenuInner() {
               </span>
             </span>
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-sm sm:justify-end">
-            {isDraft ? <span className="text-xs text-brand-yellow">Draft</span> : null}
+          <div className="grid w-full grid-cols-3 gap-2 text-sm sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
+            {isDraft ? <span className="col-span-3 text-xs text-brand-yellow sm:col-auto">Draft</span> : null}
             <button
               type="button"
               onClick={async () => {
@@ -261,7 +303,7 @@ function AdminMenuInner() {
                   saveMessage(error, "Could not save");
                 }
               }}
-              className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
+              className={`min-h-11 rounded-full px-2 py-2 text-center text-xs font-semibold sm:px-3 sm:text-sm ${
                 item.isAvailable ? "border border-white/15" : "bg-brand-yellow text-white"
               }`}
             >
@@ -279,7 +321,7 @@ function AdminMenuInner() {
                   isVeg: item.isVeg,
                 });
               }}
-              className="rounded-full border border-brand-gold/40 px-3 py-1.5 text-brand-gold"
+              className="min-h-11 rounded-full border border-brand-gold/40 px-2 py-2 text-center text-xs text-brand-gold sm:px-3 sm:text-sm"
             >
               Edit
             </button>
@@ -295,7 +337,7 @@ function AdminMenuInner() {
                   saveMessage(error, "Could not delete");
                 }
               }}
-              className="rounded-full border border-white/15 px-3 py-1.5 text-brand-cream/55"
+              className="min-h-11 rounded-full border border-white/15 px-2 py-2 text-center text-xs text-brand-cream/55 sm:px-3 sm:text-sm"
             >
               Delete
             </button>
@@ -330,14 +372,25 @@ function AdminMenuInner() {
             <p className="text-[11px] uppercase tracking-[0.18em] text-brand-gold">Wok list</p>
             <h1 className="truncate font-display text-2xl font-bold sm:text-3xl">{title}</h1>
           </div>
-          <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
-            <button type="button" onClick={() => setShowAdd(true)} className="btn-glow flex-1 px-4 py-2 text-sm sm:flex-none">
+          <div className="grid w-full grid-cols-1 gap-2 xs:grid-cols-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
+            <button type="button" onClick={() => setShowAdd(true)} className="btn-glow px-4 py-2.5 text-sm xs:col-span-2 sm:col-auto sm:flex-none">
               + Add item
             </button>
             <button
               type="button"
+              onClick={() => {
+                if (!category) return;
+                setCategoryForm({ name: category.name, iconUrl: category.iconUrl || "" });
+                setShowEditCategory(true);
+              }}
+              className="min-h-11 rounded-full border border-brand-gold/40 px-3 py-2 text-sm text-brand-gold"
+            >
+              Edit category
+            </button>
+            <button
+              type="button"
               onClick={removeCategory}
-              className="flex-1 rounded-full border border-brand-yellow/40 px-3 py-2 text-sm text-brand-yellow sm:flex-none"
+              className="min-h-11 rounded-full border border-brand-yellow/40 px-3 py-2 text-sm text-brand-yellow"
             >
               Delete category
             </button>
@@ -375,55 +428,139 @@ function AdminMenuInner() {
 
         {showAdd ? (
           <KitchenPopup title="Add item" onClose={() => setShowAdd(false)}>
-            <form onSubmit={createVariation} className="grid gap-3 md:grid-cols-2">
+            <form onSubmit={createVariation} className="grid gap-4 sm:grid-cols-2">
               <input
                 required
                 value={form.name}
                 onChange={(event) => setForm({ ...form, name: event.target.value })}
                 placeholder="Item name"
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2"
+                className="field-input"
               />
               <input
                 required
                 value={form.price}
                 onChange={(event) => setForm({ ...form, price: event.target.value })}
                 placeholder="Price"
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2"
+                className="field-input"
               />
-              <label className="text-sm text-brand-cream/70 md:col-span-2">
-                Photo
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="mt-2 block w-full text-xs"
-                  onChange={async (event) => {
-                    const file = event.target.files?.[0];
-                    if (!file) return;
-                    try {
-                      const url = await uploadKitchenPhoto(file);
-                      setForm((current) => ({ ...current, imageUrl: url }));
-                    } catch (error) {
-                      saveMessage(error, "Upload failed");
-                    }
-                  }}
-                />
-              </label>
-              {form.imageUrl ? <p className="text-xs text-brand-gold md:col-span-2">Photo uploaded.</p> : null}
+              <div className="sm:col-span-2">
+                <p className="text-sm text-brand-cream/70">Photo</p>
+                <div className="relative mt-2 aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                  {form.imageUrl ? (
+                    <Image src={form.imageUrl} alt="" fill unoptimized className="object-cover" sizes="(max-width: 640px) 100vw, 32rem" />
+                  ) : (
+                    <div className="grid h-full place-items-center text-sm text-brand-cream/45">No photo yet</div>
+                  )}
+                </div>
+                <label className="mt-3 inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border border-brand-gold/40 px-4 text-sm text-brand-gold sm:w-auto">
+                  Choose photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const url = await uploadKitchenPhoto(file);
+                        setForm((current) => ({ ...current, imageUrl: url }));
+                      } catch (error) {
+                        saveMessage(error, "Upload failed");
+                      }
+                    }}
+                  />
+                </label>
+              </div>
               <textarea
                 value={form.description}
                 onChange={(event) => setForm({ ...form, description: event.target.value })}
                 placeholder="Short description"
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 md:col-span-2"
+                className="min-h-24 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 sm:col-span-2"
               />
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex min-h-11 items-center gap-2 text-sm">
                 <input type="checkbox" checked={form.isVeg} onChange={(event) => setForm({ ...form, isVeg: event.target.checked })} />
                 Vegetarian
               </label>
-              <div className="flex gap-3 md:col-span-2">
-                <button disabled={saving || !category} className="btn-glow px-5 py-2">
+              <div className="stack-actions sm:col-span-2">
+                <button disabled={saving || !category} className="btn-glow w-full px-5 py-2.5 sm:w-auto">
                   {saving ? "Saving..." : "Save draft"}
                 </button>
-                <button type="button" onClick={() => setShowAdd(false)} className="text-sm text-brand-cream/60">
+                <button type="button" onClick={() => setShowAdd(false)} className="min-h-11 text-sm text-brand-cream/60">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </KitchenPopup>
+        ) : null}
+        {showEditCategory && category ? (
+          <KitchenPopup
+            title="Edit category"
+            onClose={() => {
+              setShowEditCategory(false);
+              setCategoryForm({ name: "", iconUrl: "" });
+            }}
+          >
+            <form onSubmit={saveCategory} className="grid gap-4">
+              <label className="block text-sm text-brand-cream/70">
+                Category name
+                <input
+                  required
+                  autoFocus
+                  value={categoryForm.name}
+                  onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })}
+                  placeholder="Category name"
+                  className="field-input mt-2"
+                />
+              </label>
+              <div>
+                <p className="text-sm text-brand-cream/70">Category image</p>
+                <div className="relative mt-2 aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                  {categoryForm.iconUrl ? (
+                    <Image
+                      src={categoryForm.iconUrl}
+                      alt={categoryForm.name || "Category"}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, 32rem"
+                    />
+                  ) : (
+                    <div className="grid h-full place-items-center px-4 text-center text-sm text-brand-cream/45">
+                      No photo yet
+                    </div>
+                  )}
+                </div>
+                <label className="mt-3 inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border border-brand-gold/40 px-4 text-sm text-brand-gold sm:w-auto">
+                  Change photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const url = await uploadKitchenPhoto(file);
+                        setCategoryForm((current) => ({ ...current, iconUrl: url }));
+                      } catch (error) {
+                        saveMessage(error, "Upload failed");
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="stack-actions">
+                <button disabled={saving} className="btn-glow w-full px-5 py-2.5 sm:w-auto">
+                  {saving ? "Saving..." : "Save category"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditCategory(false);
+                    setCategoryForm({ name: "", iconUrl: "" });
+                  }}
+                  className="min-h-11 text-sm text-brand-cream/60"
+                >
                   Cancel
                 </button>
               </div>
@@ -492,36 +629,45 @@ function AdminMenuInner() {
             setCategoryForm({ name: "", iconUrl: "" });
           }}
         >
-          <form onSubmit={createCategory} className="grid gap-3">
+          <form onSubmit={createCategory} className="grid gap-4">
             <input
               required
               autoFocus
               value={categoryForm.name}
               onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })}
               placeholder="Category name — e.g. Pasta"
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2"
+              className="field-input"
             />
-            <label className="text-sm text-brand-cream/70">
-              Category image
-              <input
-                type="file"
-                accept="image/*"
-                className="mt-2 block w-full text-xs"
-                onChange={async (event) => {
-                  const file = event.target.files?.[0];
-                  if (!file) return;
-                  try {
-                    const url = await uploadKitchenPhoto(file);
-                    setCategoryForm((current) => ({ ...current, iconUrl: url }));
-                  } catch (error) {
-                    saveMessage(error, "Upload failed");
-                  }
-                }}
-              />
-            </label>
-            {categoryForm.iconUrl ? <p className="text-xs text-brand-gold">Photo uploaded.</p> : null}
-            <div className="flex gap-3">
-              <button disabled={saving} className="btn-glow px-5 py-2">
+            <div>
+              <p className="text-sm text-brand-cream/70">Category image</p>
+              <div className="relative mt-2 aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                {categoryForm.iconUrl ? (
+                  <Image src={categoryForm.iconUrl} alt="" fill unoptimized className="object-cover" sizes="(max-width: 640px) 100vw, 32rem" />
+                ) : (
+                  <div className="grid h-full place-items-center text-sm text-brand-cream/45">No photo yet</div>
+                )}
+              </div>
+              <label className="mt-3 inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border border-brand-gold/40 px-4 text-sm text-brand-gold sm:w-auto">
+                Choose photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const url = await uploadKitchenPhoto(file);
+                      setCategoryForm((current) => ({ ...current, iconUrl: url }));
+                    } catch (error) {
+                      saveMessage(error, "Upload failed");
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            <div className="stack-actions">
+              <button disabled={saving} className="btn-glow w-full px-5 py-2.5 sm:w-auto">
                 {saving ? "Saving..." : "Create category"}
               </button>
               <button
@@ -530,7 +676,7 @@ function AdminMenuInner() {
                   setShowNewCategory(false);
                   setCategoryForm({ name: "", iconUrl: "" });
                 }}
-                className="text-sm text-brand-cream/60"
+                className="min-h-11 text-sm text-brand-cream/60"
               >
                 Cancel
               </button>

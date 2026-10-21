@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { displayOrderNumber, formatINR } from "@/lib/constants";
 import { kitchenStatusLabel, paymentMethodLabel, paymentStatusLabel } from "@/lib/orderLabels";
+import { PayOrderButton } from "@/components/order/PayOrderButton";
 
 export type BillItem = {
   id?: string;
@@ -55,7 +56,7 @@ export function OrderBill({
   const payStatus = payment?.status || order.paymentStatus;
   const payMethod = payment?.method || order.paymentMethod;
   const failed = payStatus === "failed";
-  const unpaid = payStatus === "pending" || failed;
+  const needsUpi = (payStatus === "pending" || failed) && payMethod !== "cash";
 
   return (
     <article className={`card-surface p-5 ${failed ? "border border-brand-yellow/40" : ""}`}>
@@ -64,7 +65,13 @@ export function OrderBill({
           <p className="font-display text-2xl text-brand-gold">{displayOrderNumber(order.serialNumber)}</p>
           <p className="text-sm text-brand-cream/60">
             {new Date(order.createdAt).toLocaleString("en-IN")}
-            {order.type === "dine_in" && order.tableNumber ? ` · Table ${order.tableNumber}` : order.type === "takeaway" ? " · Takeaway" : ""}
+            {order.type === "dine_in"
+              ? order.tableNumber
+                ? ` · Table ${order.tableNumber}`
+                : " · Table assigning"
+              : order.type === "takeaway"
+                ? " · Takeaway"
+                : ""}
           </p>
         </div>
         <div className="text-right">
@@ -133,11 +140,7 @@ export function OrderBill({
         <Link href={`/order/${order.id}`} className="rounded-full border border-white/10 px-4 py-2 text-sm">
           View bill
         </Link>
-        {unpaid ? (
-          <Link href={`/pay/${order.id}`} className="rounded-full bg-brand-yellow px-4 py-2 text-sm text-white">
-            {failed ? "Retry payment" : "Pay now"}
-          </Link>
-        ) : null}
+        {needsUpi ? <PayOrderButton orderId={order.id} label={failed ? "Retry payment" : "Pay now"} /> : null}
         {onReorder ? (
           <button type="button" onClick={onReorder} className="btn-glow px-4 py-2 text-sm">
             Re-order

@@ -50,6 +50,17 @@ export async function deleteKitchenItem(id: string) {
   if (!res.ok) throw new Error(data.error || "Could not delete");
 }
 
+export async function patchKitchenCategory(id: string, body: { name?: string; iconUrl?: string | null }) {
+  const res = await fetch(`/api/categories/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Could not save category");
+  return data;
+}
+
 export async function deleteKitchenCategory(id: string) {
   const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
   const data = await res.json().catch(() => ({}));

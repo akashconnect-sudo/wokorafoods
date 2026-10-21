@@ -45,7 +45,7 @@ export function brandWhatsApp() {
 
 export const GST_RATE = 0.05;
 
-export const TABLE_COUNT = 20;
+export const TABLE_COUNT = 3;
 
 export { MENU_CATEGORIES as CATEGORY_META } from "@/data/menu";
 

@@ -120,6 +120,24 @@ export async function afterOrderUpdated(event: OrderUpdatedEvent) {
   await notify(event);
 }
 
+export async function afterTableAssigned(event: {
+  storeId: string;
+  orderId: string;
+  userId: string;
+  serialNumber: number;
+  tableNumber: string;
+}) {
+  await prisma.notification.create({
+    data: {
+      storeId: event.storeId,
+      userId: event.userId,
+      orderId: event.orderId,
+      title: "Your assigned table",
+      body: `Your assigned table is Table ${event.tableNumber} for order ${displayOrderNumber(event.serialNumber)}.`,
+    },
+  });
+}
+
 export async function afterPaymentChanged(event: {
   storeId: string;
   orderId: string;

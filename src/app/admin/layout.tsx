@@ -18,7 +18,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link href="/admin/menu" className="text-brand-cream/75 transition hover:text-brand-yellow">Menu</Link>
             <Link href="/admin/settings" className="text-brand-cream/75 transition hover:text-brand-yellow">Settings</Link>
             <Link href="/admin/kiosk" className="text-brand-cream/75 transition hover:text-brand-yellow">Print kiosk</Link>
-            <Link href="/admin/tables" className="text-brand-cream/75 transition hover:text-brand-yellow">Table QR</Link>
+            <Link href="/admin/tables" className="text-brand-cream/75 transition hover:text-brand-yellow">Tables</Link>
           </div>
           <LogoutButton className="shrink-0 rounded-full border border-brand-yellow/40 px-3 py-1 text-brand-yellow hover:bg-brand-yellow/10" />
         </div>

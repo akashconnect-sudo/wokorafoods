@@ -3,8 +3,9 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { buildReceiptHtml, printReceipt } from "@/lib/printReceipt";
-import { afterOrderUpdated, afterPaymentChanged, type OrderUpdatedEvent } from "@/lib/orderEvents";
+import { afterOrderUpdated, afterPaymentChanged, afterTableAssigned, type OrderUpdatedEvent } from "@/lib/orderEvents";
 import { DEFAULT_STORE_ID } from "@/lib/store";
+import { TABLE_COUNT } from "@/lib/constants";
 import { attachItemCustomizations } from "@/lib/cartPersistence";
 import { recordPayment, hidePayoutFields, type PaymentStatus } from "@/lib/payments";
 import {
@@ -181,7 +182,9 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     etaMinutes?: number;
     etaSetAt?: Date;
     paymentStatus?: string;
+    tableNumber?: string;
   } = {};
+  let assignedTable = "";
 
   if (typeof body.status === "string" && STATUSES.has(body.status)) {
     data.status = body.status;
@@ -200,6 +203,18 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   const payStatus = safePayStatus(body.paymentStatus);
   if (payStatus) {
     data.paymentStatus = payStatus;
+  }
+
+  if (typeof body.tableNumber === "string") {
+    const nextTable = body.tableNumber.trim();
+    const allowed = new Set(Array.from({ length: TABLE_COUNT }, (_, index) => String(index + 1)));
+    if (!allowed.has(nextTable)) {
+      return NextResponse.json({ error: "Choose table 1, 2, or 3" }, { status: 400 });
+    }
+    if (existing.type === "dine_in" && nextTable !== (existing.tableNumber || "")) {
+      data.tableNumber = nextTable;
+      assignedTable = nextTable;
+    }
   }
 
   const order = await prisma.order.update({
@@ -230,17 +245,28 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     });
   }
 
-  const updated: OrderUpdatedEvent = {
-    type: "OrderUpdated",
-    storeId: order.storeId,
-    orderId: order.id,
-    userId: order.userId,
-    serialNumber: order.serialNumber,
-    status: order.status,
-    etaMinutes: order.etaMinutes,
-  };
+  if (assignedTable) {
+    await afterTableAssigned({
+      storeId: order.storeId,
+      orderId: order.id,
+      userId: order.userId,
+      serialNumber: order.serialNumber,
+      tableNumber: assignedTable,
+    });
+  }
 
-  await afterOrderUpdated(updated);
+  if (!assignedTable || data.status !== undefined || data.etaMinutes !== undefined) {
+    const updated: OrderUpdatedEvent = {
+      type: "OrderUpdated",
+      storeId: order.storeId,
+      orderId: order.id,
+      userId: order.userId,
+      serialNumber: order.serialNumber,
+      status: order.status,
+      etaMinutes: order.etaMinutes,
+    };
+    await afterOrderUpdated(updated);
+  }
 
   return NextResponse.json({ order });
 }
