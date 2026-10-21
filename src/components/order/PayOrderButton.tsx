@@ -20,6 +20,7 @@ export function PayOrderButton({ orderId, label }: { orderId: string; label: str
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : "";
       setError(message === "Payment cancelled" ? "Payment cancelled." : userFacingError(message));
+      router.refresh();
     } finally {
       setLoading(false);
     }

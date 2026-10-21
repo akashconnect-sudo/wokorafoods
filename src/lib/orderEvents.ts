@@ -144,12 +144,28 @@ export async function afterPaymentChanged(event: {
   serialNumber: number;
   paymentStatus: string;
   totalAmount: number;
+  userId?: string;
 }) {
   const number = displayOrderNumber(event.serialNumber);
+  const label = paymentStatusLabel(event.paymentStatus);
   await notifyKitchen(
     event.storeId,
     event.orderId,
     `Payment · ${number}`,
-    `${paymentStatusLabel(event.paymentStatus)} · ₹${Math.round(event.totalAmount)}`
+    `${label} · ₹${Math.round(event.totalAmount)}`
   );
+  if (event.userId && (event.paymentStatus === "failed" || event.paymentStatus === "paid")) {
+    await prisma.notification.create({
+      data: {
+        storeId: event.storeId,
+        userId: event.userId,
+        orderId: event.orderId,
+        title: event.paymentStatus === "failed" ? "Payment failed" : "Payment received",
+        body:
+          event.paymentStatus === "failed"
+            ? `Payment failed for order ${number}. Open the bill and try again.`
+            : `Payment received for order ${number}.`,
+      },
+    });
+  }
 }

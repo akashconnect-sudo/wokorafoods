@@ -81,8 +81,18 @@ export async function openRazorpayCheckout(orderId: string) {
         ondismiss: () => reject(new Error("Payment cancelled")),
       },
     });
-    checkout.on("payment.failed", (response) => {
-      reject(new Error(response.error?.description || "Payment failed"));
+    checkout.on("payment.failed", async (response) => {
+      const reason = response.error?.description || "Payment failed";
+      try {
+        await fetch(`/api/orders/${orderId}/razorpay/fail`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reason }),
+        });
+      } catch {
+        // Status update is best-effort; still show the failure to the customer.
+      }
+      reject(new Error(reason));
     });
     checkout.open();
   });

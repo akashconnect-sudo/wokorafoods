@@ -196,5 +196,16 @@ html.festive .btn-glow {
 input,
 select,
 textarea {
-  color-scheme: inherit;
+  color-scheme: dark;
+}
+
+select,
+select.field-input {
+  background-color: #111111;
+  color: #f5f0e6;
+}
+
+select option {
+  background-color: #111111;
+  color: #f5f0e6;
 }

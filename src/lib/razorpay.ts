@@ -1,9 +1,12 @@
 import { createHmac, timingSafeEqual } from "crypto";
 
 export function razorpayKeys() {
-  const keyId = process.env.RAZORPAY_KEY_ID?.trim() || "";
-  const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim() || "";
-  if (!keyId || !keySecret) return null;
+  const keyId = process.env.RAZORPAY_KEY_ID?.trim().replace(/^["']|["']$/g, "") || "";
+  const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim().replace(/^["']|["']$/g, "") || "";
+  if (!keyId || !keySecret) {
+    console.error("[razorpay] Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET");
+    return null;
+  }
   return { keyId, keySecret };
 }
 
@@ -26,8 +29,14 @@ export async function createRazorpayOrder(amountPaise: number, receipt: string) 
       receipt: receipt.slice(0, 40),
     }),
   });
-  if (res.status === 401) return { error: "auth" as const };
-  if (!res.ok) return { error: "api" as const };
+  if (res.status === 401) {
+    console.error("[razorpay] Authentication failed — check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET");
+    return { error: "auth" as const };
+  }
+  if (!res.ok) {
+    console.error("[razorpay] Order create failed", res.status);
+    return { error: "api" as const };
+  }
   const data = (await res.json()) as { id?: string; amount?: number };
   if (!data.id || typeof data.amount !== "number") return { error: "api" as const };
   return { id: data.id, amount: data.amount, keyId: keys.keyId };

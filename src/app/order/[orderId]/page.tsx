@@ -80,10 +80,21 @@ export default function OrderPage() {
           ? `The kitchen expects this order in ${order.etaMinutes} minutes`
           : "You will be notified as soon as the kitchen sets a wait time"}
       </p>
-      <p className="mt-1 text-center text-xs uppercase tracking-wide text-brand-cream/50">
+      <p
+        className={`mt-3 text-center text-xs font-semibold uppercase tracking-wide ${
+          order.paymentStatus === "failed"
+            ? "text-brand-yellow"
+            : order.paymentStatus === "paid"
+              ? "text-emerald-300"
+              : "text-brand-cream/50"
+        }`}
+      >
         Payment: {paymentStatusLabel(order.paymentStatus)}
         {order.paymentMethod ? ` · ${paymentMethodLabel(order.paymentMethod)}` : ""}
       </p>
+      {order.paymentStatus === "failed" ? (
+        <p className="mt-2 text-center text-sm text-brand-yellow">Payment failed. Try again below — money is not deducted for a failed attempt.</p>
+      ) : null}
       {(order.paymentStatus === "pending" || order.paymentStatus === "failed") && order.paymentMethod !== "cash" ? (
         <div className="mt-4 flex justify-center">
           <PayOrderButton orderId={order.id} label={order.paymentStatus === "failed" ? "Retry payment" : "Pay now"} />

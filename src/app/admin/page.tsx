@@ -24,7 +24,7 @@ const STATUSES = ["placed", "preparing", "ready", "served", "cancelled"];
 
 function paymentTone(status: string) {
   if (status === "paid") return "bg-emerald-500/20 text-emerald-300 border-emerald-400/40";
-  if (status === "failed") return "bg-brand-yellow/25 text-brand-yellow border-brand-yellow/50";
+  if (status === "failed") return "bg-brand-yellow/30 text-brand-yellow border-brand-yellow/60";
   if (status === "pay_at_counter") return "bg-brand-gold/20 text-brand-gold border-brand-gold/40";
   return "bg-amber-500/20 text-amber-200 border-amber-400/40";
 }

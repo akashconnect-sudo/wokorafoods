@@ -140,6 +140,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       serialNumber: existing.serialNumber,
       paymentStatus,
       totalAmount: existing.totalAmount,
+      userId: existing.userId,
     });
     return NextResponse.json({ order: hidePayoutFields(withPay || order) });
   }
@@ -242,6 +243,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       serialNumber: order.serialNumber,
       paymentStatus: payStatus,
       totalAmount: order.totalAmount,
+      userId: order.userId,
     });
   }
 

@@ -68,6 +68,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     serialNumber: existing.serialNumber,
     paymentStatus: "paid",
     totalAmount: existing.totalAmount,
+    userId: existing.userId,
   });
 
   return NextResponse.json({ ok: true });
