@@ -12,6 +12,7 @@ import {
   cartLineId,
   configKeyFromSelections,
   defaultSelections,
+  portionPriceLabels,
   summaryFromSelections,
   unitPriceFromSelections,
   type CustomizeSelections,
@@ -23,6 +24,8 @@ export type CustomizableItem = {
   name: string;
   description: string;
   price: number;
+  halfPrice?: number | null;
+  fullPrice?: number | null;
   imageUrl: string;
   isVeg: boolean;
   optionGroups?: OptionGroup[];
@@ -89,6 +92,15 @@ export function CustomizeItemPanel({
     [item.price, groups, selections]
   );
   const lineTotal = unitPrice * quantity;
+  const portions = useMemo(
+    () =>
+      portionPriceLabels(item.price, groups, {
+        price: item.price,
+        halfPrice: item.halfPrice,
+        fullPrice: item.fullPrice,
+      }),
+    [item.price, item.halfPrice, item.fullPrice, groups]
+  );
 
   const pickSingle = (groupId: string, optionId: string) => {
     setSelections((current) => ({ ...current, [groupId]: [optionId] }));
@@ -137,7 +149,13 @@ export function CustomizeItemPanel({
               <DietMark isVeg={item.isVeg} />
               <div className="min-w-0">
                 <h2 className="font-display text-lg font-semibold leading-tight">{item.name}</h2>
-                <p className="mt-1 text-sm text-brand-gold">{formatINR(item.price)}</p>
+                {portions ? (
+                  <p className="mt-1 text-sm text-brand-gold">
+                    Half {formatINR(portions.half)} · Full {formatINR(portions.full)}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-sm text-brand-gold">{formatINR(item.price)}</p>
+                )}
               </div>
             </div>
           </div>
@@ -153,13 +171,21 @@ export function CustomizeItemPanel({
           )}
           {groups.map((group) => (
             <div key={group.id}>
-              <p className="font-display text-base font-semibold">{group.label}</p>
-              <p className="mt-0.5 text-xs text-brand-cream/45">
-                {group.type === "single" ? "Choose one" : "Choose any"}
+              <p className="font-display text-base font-semibold">
+                {group.id === "size" && portions ? "Half or Full" : group.label}
               </p>
-              <div className="mt-3 space-y-2">
+              <p className="mt-0.5 text-xs text-brand-cream/45">
+                {group.type === "single" ? "Choose one — payment uses this price + GST" : "Choose any"}
+              </p>
+              <div className={`mt-3 ${group.id === "size" && portions ? "grid grid-cols-2 gap-2" : "space-y-2"}`}>
                 {group.options.map((option) => {
                   const selected = (selections[group.id] || []).includes(option.id);
+                  const priceText =
+                    group.id === "size" && portions
+                      ? option.id === "full"
+                        ? formatINR(portions.full)
+                        : formatINR(portions.half)
+                      : optionPriceLabel(option.priceDelta, item.price, group.id);
                   return (
                     <button
                       key={option.id}
@@ -169,7 +195,7 @@ export function CustomizeItemPanel({
                       }
                       className={`flex w-full items-center justify-between rounded-2xl border px-3 py-3 text-left transition ${
                         selected ? "border-brand-gold bg-brand-gold/10" : "border-white/10 bg-white/5"
-                      }`}
+                      } ${group.id === "size" && portions ? "flex-col items-start gap-2 sm:flex-row sm:items-center" : ""}`}
                     >
                       <span className="flex items-center gap-3">
                         <span
@@ -181,11 +207,9 @@ export function CustomizeItemPanel({
                             <span className={`bg-brand-gold ${group.type === "single" ? "h-2 w-2 rounded-full" : "h-2 w-2"}`} />
                           )}
                         </span>
-                        <span className="text-sm">{option.label}</span>
+                        <span className="text-sm font-semibold">{option.label}</span>
                       </span>
-                      <span className="text-sm font-medium text-brand-gold">
-                        {optionPriceLabel(option.priceDelta, item.price, group.id)}
-                      </span>
+                      <span className="text-base font-display font-semibold text-brand-gold">{priceText}</span>
                     </button>
                   );
                 })}

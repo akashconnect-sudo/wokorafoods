@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { displayOrderNumber } from "@/lib/constants";
 import { createRazorpayOrder } from "@/lib/razorpay";
-import { assertSameOrigin, rateLimit } from "@/lib/security";
+import { assertSameOrigin, paymentRateLimit, rateLimit } from "@/lib/security";
+import { recordPayment } from "@/lib/payments";
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -13,8 +14,14 @@ export async function POST(request: Request, { params }: { params: { id: string 
   }
   const originBlock = assertSameOrigin(request);
   if (originBlock) return originBlock;
-  const limited = rateLimit(`razorpay:${session.user.id}:${params.id}`, 12, 10 * 60 * 1000);
+  const burst = paymentRateLimit(request, session.user.id, "create");
+  if (burst) return burst;
+  const limited = rateLimit(`razorpay:${session.user.id}:${params.id}`, 6, 10 * 60 * 1000);
   if (limited) return limited;
+
+  if (!/^[a-z0-9]{10,40}$/i.test(params.id)) {
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
 
   const order = await prisma.order.findUnique({ where: { id: params.id } });
   if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -24,12 +31,12 @@ export async function POST(request: Request, { params }: { params: { id: string 
   if (order.status === "cancelled" || order.paymentStatus === "paid") {
     return NextResponse.json({ error: "Payment is closed" }, { status: 409 });
   }
-  if (order.paymentMethod === "cash") {
+  if (order.paymentMethod === "cash" || order.paymentStatus === "pay_at_counter") {
     return NextResponse.json({ error: "Payment is not available" }, { status: 409 });
   }
 
-  const amountPaise = Math.round(order.totalAmount * 100);
-  if (amountPaise < 100) {
+  const amountPaise = Math.round(Number(order.totalAmount) * 100);
+  if (!Number.isFinite(amountPaise) || amountPaise < 100) {
     return NextResponse.json({ error: "Payment is not available" }, { status: 400 });
   }
 
@@ -39,6 +46,16 @@ export async function POST(request: Request, { params }: { params: { id: string 
     return NextResponse.json({ error: "Payment is not available" }, { status });
   }
 
+  await recordPayment({
+    storeId: order.storeId,
+    orderId: order.id,
+    userId: order.userId,
+    method: "upi",
+    status: "pending",
+    amount: order.totalAmount,
+    txnRef: razorpay.id,
+  });
+
   return NextResponse.json({
     keyId: razorpay.keyId,
     razorpayOrderId: razorpay.id,
@@ -47,9 +64,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
     name: "Wokora Foods",
     description: `Order ${displayOrderNumber(order.serialNumber)}`,
     prefill: {
-      name: session.user.name || "",
-      email: session.user.email || "",
-      contact: session.user.phone || "",
+      name: (session.user.name || "").slice(0, 80),
+      email: (session.user.email || "").slice(0, 120),
+      contact: (session.user.phone || "").replace(/\D/g, "").slice(-10),
     },
   });
 }

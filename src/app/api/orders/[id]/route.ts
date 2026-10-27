@@ -74,12 +74,20 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   if (!existing) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
   if (body.pay === true || body.pay === false) {
-    const limited = rateLimit(`pay:${session.user.id}:${existing.id}`, 8, 10 * 60 * 1000);
+    const limited = rateLimit(`pay:${session.user.id}:${existing.id}`, 6, 10 * 60 * 1000);
     if (limited) return limited;
+    // Only kitchen/admin may mark an order paid outside Razorpay (cash at counter).
+    // Customers cannot forge a paid status — Razorpay verify is the only paid path for UPI.
+    if (body.pay === true && session.user.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     if (session.user.role !== "admin" && existing.userId !== session.user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-    if (session.user.role !== "admin" && !verifyPaymentToken(existing.id, existing.userId, typeof body.payToken === "string" ? body.payToken : "")) {
+    if (
+      session.user.role !== "admin" &&
+      !verifyPaymentToken(existing.id, existing.userId, typeof body.payToken === "string" ? body.payToken : "")
+    ) {
       return NextResponse.json({ error: "Invalid payment token" }, { status: 403 });
     }
     if (existing.status === "cancelled") {
@@ -118,12 +126,12 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       method,
       status: paymentStatus,
       amount: existing.totalAmount,
-      upiApp: typeof body.upiApp === "string" ? body.upiApp.slice(0, 32) : "",
+      upiApp: typeof body.upiApp === "string" ? body.upiApp.replace(/[^\w.-]/g, "").slice(0, 32) : "",
       txnRef: existing.id,
       failureReason: body.pay
         ? ""
         : typeof body.failureReason === "string"
-          ? body.failureReason.slice(0, 180)
+          ? body.failureReason.replace(/[<>`]/g, "").slice(0, 180)
           : "Payment failed in UPI app",
     });
     const withPay = await prisma.order.findUnique({

@@ -11,6 +11,7 @@ import {
   cartLineId,
   configKeyFromSelections,
   defaultSelections,
+  portionPriceLabels,
   summaryFromSelections,
   unitPriceFromSelections,
   type OptionGroup,
@@ -22,18 +23,31 @@ export function OrderItemRow({
   item: Omit<CartItem, "quantity"> & {
     description?: string;
     isAvailable?: boolean;
+    halfPrice?: number | null;
+    fullPrice?: number | null;
     optionGroups?: OptionGroup[];
   };
 }) {
   const groups = item.optionGroups || [];
+  const hasPortion = groups.some((group) => group.id === "size" && group.options.some((o) => o.id === "half"));
   const { ensureCart, canUseCart } = useCartAccess();
   const defaultId = cartLineId(item.id, configKeyFromSelections(defaultSelections(groups)));
   const cartItem = useCartStore((state) => state.items.find((row) => row.id === defaultId));
+  const portionQty = useCartStore((state) =>
+    state.items
+      .filter((row) => (row.menuItemId || row.id.split("::")[0]) === item.id)
+      .reduce((sum, row) => sum + row.quantity, 0)
+  );
   const addItem = useCartStore((state) => state.addItem);
   const increment = useCartStore((state) => state.increment);
   const decrement = useCartStore((state) => state.decrement);
   const [broken, setBroken] = useState(false);
   const [open, setOpen] = useState(false);
+  const portions = portionPriceLabels(item.price, groups, {
+    price: item.price,
+    halfPrice: item.halfPrice,
+    fullPrice: item.fullPrice,
+  });
 
   const openPanel = () => {
     if (item.isAvailable === false) return;
@@ -65,26 +79,40 @@ export function OrderItemRow({
             {item.description && (
               <p className="mt-1 line-clamp-2 text-sm text-brand-cream/55">{item.description}</p>
             )}
-            <p className="mt-2 font-display text-brand-gold">{formatINR(item.price)}</p>
+            {portions ? (
+              <p className="mt-2 font-display text-sm text-brand-gold sm:text-base">
+                Half {formatINR(portions.half)} · Full {formatINR(portions.full)}
+              </p>
+            ) : (
+              <p className="mt-2 font-display text-brand-gold">{formatINR(item.price)}</p>
+            )}
           </div>
         </div>
       </button>
       <div className="shrink-0">
         {item.isAvailable === false ? (
           <p className="text-xs text-brand-yellow">Sold out</p>
-        ) : canUseCart && cartItem ? (
+        ) : canUseCart && cartItem && !hasPortion ? (
           <QuantityStepper
             compact
             value={cartItem.quantity}
             onIncrement={() => increment(cartItem.id)}
             onDecrement={() => decrement(cartItem.id)}
           />
+        ) : canUseCart && hasPortion && portionQty > 0 ? (
+          <button
+            type="button"
+            onClick={openPanel}
+            className="rounded-full border border-brand-gold/40 px-3 py-1.5 text-xs font-semibold text-brand-gold sm:px-4 sm:text-sm"
+          >
+            {portionQty} · Edit
+          </button>
         ) : (
           <button
             type="button"
             onClick={() => {
               if (!ensureCart()) return;
-              if (groups.some((group) => group.id === "size")) {
+              if (hasPortion || groups.some((group) => group.id === "size")) {
                 setOpen(true);
                 return;
               }
@@ -115,6 +143,8 @@ export function OrderItemRow({
             name: item.name,
             description: item.description || "",
             price: item.price,
+            halfPrice: item.halfPrice,
+            fullPrice: item.fullPrice,
             imageUrl: item.imageUrl,
             isVeg: item.isVeg,
             optionGroups: groups,

@@ -247,6 +247,24 @@ export function basePriceForItem(portions?: PortionPrices | null) {
   return resolvePortionPrices(portions).half;
 }
 
+export function portionPriceLabels(
+  basePrice: number,
+  groups: OptionGroup[],
+  portions?: PortionPrices | null
+): { half: number; full: number } | null {
+  const size = groups.find((group) => group.id === "size");
+  const halfOpt = size?.options.find((option) => option.id === "half");
+  const fullOpt = size?.options.find((option) => option.id === "full");
+  if (!halfOpt || !fullOpt) return null;
+  const resolved = resolvePortionPrices(portions ?? { price: basePrice });
+  const half = resolved.half + halfOpt.priceDelta;
+  const full =
+    resolved.full != null && resolved.full > 0
+      ? resolved.full
+      : basePrice + fullOpt.priceDelta;
+  return { half, full };
+}
+
 export function defaultSelections(groups: OptionGroup[]): CustomizeSelections {
   const selections: CustomizeSelections = {};
   for (const group of groups) {

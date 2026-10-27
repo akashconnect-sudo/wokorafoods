@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { afterPaymentChanged } from "@/lib/orderEvents";
 import { recordPayment } from "@/lib/payments";
-import { assertSameOrigin, rateLimit } from "@/lib/security";
+import { sanitizePaymentReason } from "@/lib/razorpay";
+import { assertSameOrigin, paymentRateLimit, rateLimit } from "@/lib/security";
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -13,14 +14,20 @@ export async function POST(request: Request, { params }: { params: { id: string 
   }
   const originBlock = assertSameOrigin(request);
   if (originBlock) return originBlock;
-  const limited = rateLimit(`razorpay-fail:${session.user.id}:${params.id}`, 12, 10 * 60 * 1000);
+  const burst = paymentRateLimit(request, session.user.id, "fail");
+  if (burst) return burst;
+  const limited = rateLimit(`razorpay-fail:${session.user.id}:${params.id}`, 8, 10 * 60 * 1000);
   if (limited) return limited;
+
+  if (!/^[a-z0-9]{10,40}$/i.test(params.id)) {
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
 
   let reason = "Payment failed";
   try {
     const body = await request.json();
     if (typeof body.reason === "string" && body.reason.trim()) {
-      reason = body.reason.trim().slice(0, 180);
+      reason = sanitizePaymentReason(body.reason) || "Payment failed";
     }
   } catch {
     // optional body
@@ -35,28 +42,35 @@ export async function POST(request: Request, { params }: { params: { id: string 
     return NextResponse.json({ error: "Payment is closed" }, { status: 409 });
   }
 
-  const order = await prisma.order.update({
-    where: { id: existing.id },
+  const updated = await prisma.order.updateMany({
+    where: {
+      id: existing.id,
+      paymentStatus: { notIn: ["paid"] },
+      status: { not: "cancelled" },
+    },
     data: { paymentStatus: "failed", paymentMethod: existing.paymentMethod || "upi" },
   });
+  if (updated.count === 0) {
+    return NextResponse.json({ ok: true });
+  }
 
   await recordPayment({
-    storeId: order.storeId,
-    orderId: order.id,
-    userId: order.userId,
-    method: order.paymentMethod || "upi",
+    storeId: existing.storeId,
+    orderId: existing.id,
+    userId: existing.userId,
+    method: existing.paymentMethod || "upi",
     status: "failed",
-    amount: order.totalAmount,
+    amount: existing.totalAmount,
     failureReason: reason,
   });
 
   await afterPaymentChanged({
-    storeId: order.storeId,
-    orderId: order.id,
-    serialNumber: order.serialNumber,
+    storeId: existing.storeId,
+    orderId: existing.id,
+    serialNumber: existing.serialNumber,
     paymentStatus: "failed",
-    totalAmount: order.totalAmount,
-    userId: order.userId,
+    totalAmount: existing.totalAmount,
+    userId: existing.userId,
   });
 
   return NextResponse.json({ ok: true });

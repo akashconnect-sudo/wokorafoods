@@ -11,7 +11,14 @@ function secret() {
 }
 
 export function allowedOrigins() {
-  const list = [getSiteUrl(), process.env.NEXTAUTH_URL, "http://localhost:3000", "http://127.0.0.1:3000"];
+  const list = [
+    getSiteUrl(),
+    process.env.NEXTAUTH_URL,
+    "https://wokorafoods.com",
+    "https://www.wokorafoods.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ];
   const origins = new Set<string>();
   for (const raw of list) {
     if (!raw) continue;
@@ -22,6 +29,21 @@ export function allowedOrigins() {
     }
   }
   return origins;
+}
+
+export function clientIp(request: Request) {
+  const forwarded = request.headers.get("x-forwarded-for") || "";
+  const first = forwarded.split(",")[0]?.trim();
+  if (first) return first.slice(0, 64);
+  return (request.headers.get("x-real-ip") || "unknown").slice(0, 64);
+}
+
+export function paymentRateLimit(request: Request, userId: string, action: string) {
+  const ip = clientIp(request);
+  return (
+    rateLimit(`payip:${action}:${ip}`, 30, 10 * 60 * 1000) ||
+    rateLimit(`payuser:${action}:${userId}`, 20, 10 * 60 * 1000)
+  );
 }
 
 export function requestOrigin(request: Request) {
