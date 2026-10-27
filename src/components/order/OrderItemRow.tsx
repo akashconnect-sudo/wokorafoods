@@ -80,11 +80,13 @@ export function OrderItemRow({
               <p className="mt-1 line-clamp-2 text-sm text-brand-cream/55">{item.description}</p>
             )}
             {portions ? (
-              <p className="mt-2 font-display text-sm text-brand-gold sm:text-base">
-                Half {formatINR(portions.half)} · Full {formatINR(portions.full)}
+              <p className="mt-2 flex flex-wrap gap-x-2 gap-y-0.5 font-display text-xs text-brand-yellow sm:text-sm">
+                <span>Half {formatINR(portions.half)}</span>
+                <span className="text-brand-cream/35">·</span>
+                <span>Full {formatINR(portions.full)}</span>
               </p>
             ) : (
-              <p className="mt-2 font-display text-brand-gold">{formatINR(item.price)}</p>
+              <p className="mt-2 font-display text-brand-yellow">{formatINR(item.price)}</p>
             )}
           </div>
         </div>

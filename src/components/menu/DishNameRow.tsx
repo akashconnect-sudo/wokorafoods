@@ -61,11 +61,13 @@ export function DishNameRow({ item }: { item: FoodCardItem }) {
             <span className="min-w-0">
               <span className="block font-display text-base font-semibold leading-tight line-clamp-2">{item.name}</span>
               {portions ? (
-                <span className="mt-1 block font-display text-sm text-brand-gold">
-                  Half {formatINR(portions.half)} · Full {formatINR(portions.full)}
+                <span className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 font-display text-xs text-brand-yellow xs:text-sm">
+                  <span>Half {formatINR(portions.half)}</span>
+                  <span className="text-brand-cream/35">·</span>
+                  <span>Full {formatINR(portions.full)}</span>
                 </span>
               ) : (
-                <span className="mt-1 block font-display text-sm text-brand-gold">{formatINR(item.price)}</span>
+                <span className="mt-1 block font-display text-sm text-brand-yellow">{formatINR(item.price)}</span>
               )}
             </span>
           </span>
