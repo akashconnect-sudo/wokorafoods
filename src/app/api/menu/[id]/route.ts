@@ -20,12 +20,33 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
   const body = await request.json();
   try {
+  const halfPrice =
+    body.halfPrice !== undefined && body.halfPrice !== "" && body.halfPrice !== null
+      ? Number(body.halfPrice)
+      : undefined;
+  const fullPrice =
+    body.fullPrice !== undefined && body.fullPrice !== "" && body.fullPrice !== null
+      ? Number(body.fullPrice)
+      : undefined;
+  const price =
+    body.price !== undefined
+      ? Number(body.price)
+      : halfPrice !== undefined && !Number.isNaN(halfPrice)
+        ? halfPrice
+        : undefined;
+
   const item = await prisma.menuItem.update({
     where: { id: params.id },
     data: {
       ...(body.name !== undefined ? { name: body.name } : {}),
       ...(body.description !== undefined ? { description: body.description } : {}),
-      ...(body.price !== undefined ? { price: Number(body.price) } : {}),
+      ...(price !== undefined && !Number.isNaN(price) ? { price } : {}),
+      ...(halfPrice !== undefined
+        ? { halfPrice: Number.isNaN(halfPrice) ? null : halfPrice }
+        : {}),
+      ...(fullPrice !== undefined
+        ? { fullPrice: Number.isNaN(fullPrice) ? null : fullPrice }
+        : {}),
       ...(body.imageUrl !== undefined ? { imageUrl: body.imageUrl } : {}),
       ...(body.isVeg !== undefined ? { isVeg: Boolean(body.isVeg) } : {}),
       ...(body.isAvailable !== undefined ? { isAvailable: Boolean(body.isAvailable) } : {}),

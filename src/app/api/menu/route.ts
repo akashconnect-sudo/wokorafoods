@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { cacheDel, cacheGet, cacheSet, menuCacheKey } from "@/lib/cache/menu";
 import { DEFAULT_STORE_ID } from "@/lib/store";
-import { optionGroupsFor } from "@/lib/customizations";
+import { basePriceForItem, optionGroupsFor } from "@/lib/customizations";
 import { serverErrorJson } from "@/lib/publicError";
 
 export async function GET(request: Request) {
@@ -47,10 +47,18 @@ export async function GET(request: Request) {
   })).filter((row) => showHidden || used.has(row.id));
 
   const payload = {
-    items: items.map((item) => ({
-      ...item,
-      optionGroups: optionGroupsFor(item.category.slug, item.isVeg),
-    })),
+    items: items.map((item) => {
+      const portions = {
+        price: item.price,
+        halfPrice: item.halfPrice,
+        fullPrice: item.fullPrice,
+      };
+      return {
+        ...item,
+        price: basePriceForItem(portions),
+        optionGroups: optionGroupsFor(item.category.slug, item.isVeg, portions),
+      };
+    }),
     categories,
   };
   if (!q) await cacheSet(cacheKey, payload);
@@ -78,6 +86,15 @@ export async function POST(request: Request) {
     n += 1;
   }
 
+  const halfPrice =
+    body.halfPrice !== undefined && body.halfPrice !== "" && body.halfPrice !== null
+      ? Number(body.halfPrice)
+      : Number(body.price);
+  const fullPrice =
+    body.fullPrice !== undefined && body.fullPrice !== "" && body.fullPrice !== null
+      ? Number(body.fullPrice)
+      : null;
+
   const item = await prisma.menuItem.create({
     data: {
       storeId,
@@ -85,7 +102,9 @@ export async function POST(request: Request) {
       slug,
       categoryId: body.categoryId,
       description: body.description || "",
-      price: Number(body.price),
+      price: Number.isNaN(halfPrice) ? Number(body.price) : halfPrice,
+      halfPrice: Number.isNaN(halfPrice) ? null : halfPrice,
+      fullPrice: fullPrice != null && !Number.isNaN(fullPrice) ? fullPrice : null,
       imageUrl: body.imageUrl || "",
       isVeg: Boolean(body.isVeg),
       isAvailable: body.isAvailable === true,

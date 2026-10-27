@@ -47,7 +47,8 @@ function DietMark({ isVeg }: { isVeg: boolean }) {
   );
 }
 
-function optionPriceLabel(delta: number) {
+function optionPriceLabel(delta: number, basePrice: number, groupId: string) {
+  if (groupId === "size") return formatINR(basePrice + delta);
   if (delta === 0) return "Included";
   return `+ ${formatINR(delta)}`;
 }
@@ -182,7 +183,9 @@ export function CustomizeItemPanel({
                         </span>
                         <span className="text-sm">{option.label}</span>
                       </span>
-                      <span className="text-sm text-brand-cream/60">{optionPriceLabel(option.priceDelta)}</span>
+                      <span className="text-sm font-medium text-brand-gold">
+                        {optionPriceLabel(option.priceDelta, item.price, group.id)}
+                      </span>
                     </button>
                   );
                 })}

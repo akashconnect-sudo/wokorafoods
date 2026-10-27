@@ -84,6 +84,10 @@ export function OrderItemRow({
             type="button"
             onClick={() => {
               if (!ensureCart()) return;
+              if (groups.some((group) => group.id === "size")) {
+                setOpen(true);
+                return;
+              }
               const selections = defaultSelections(groups);
               const configKey = configKeyFromSelections(selections);
               addItem({

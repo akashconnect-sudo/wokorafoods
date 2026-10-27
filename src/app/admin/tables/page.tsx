@@ -21,6 +21,7 @@ export default function KitchenTablesPage() {
   const [waiting, setWaiting] = useState<WaitingOrder[]>([]);
   const [pick, setPick] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState("");
 
   const load = () =>
     fetch("/api/tables")
@@ -44,17 +45,36 @@ export default function KitchenTablesPage() {
       setMessage("Choose an order to allocate.");
       return;
     }
+    setBusy(tableNumber);
     const res = await fetch(`/api/orders/${orderId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tableNumber }),
     });
+    setBusy("");
     if (!res.ok) {
       setMessage("Could not allocate table.");
       return;
     }
     setPick((current) => ({ ...current, [tableNumber]: "" }));
     setMessage(`Table ${tableNumber} allocated.`);
+    load();
+  };
+
+  const freeTable = async (table: TableRow) => {
+    if (!table.order?.id) return;
+    setBusy(table.number);
+    const res = await fetch(`/api/orders/${table.order.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tableNumber: null }),
+    });
+    setBusy("");
+    if (!res.ok) {
+      setMessage("Could not free table.");
+      return;
+    }
+    setMessage(`Table ${table.number} is Available for customers.`);
     load();
   };
 
@@ -70,7 +90,9 @@ export default function KitchenTablesPage() {
   return (
     <div className="page-bottom mx-auto max-w-5xl page-pad py-8 sm:py-12">
       <h1 className="heading-underline font-display text-3xl font-bold">Tables</h1>
-      <p className="mt-3 text-sm text-brand-cream/60">Only 3 tables. Mark Full or Allocate so the customer gets the assigned table.</p>
+      <p className="mt-3 text-sm text-brand-cream/60">
+        Only 3 tables. Allocate an order, or tap Free so the customer sees Available.
+      </p>
       {message ? <p className="mt-3 text-sm text-brand-gold">{message}</p> : null}
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -85,15 +107,25 @@ export default function KitchenTablesPage() {
                     : "border border-emerald-400/40 bg-emerald-500/15 text-emerald-300"
                 }`}
               >
-                {table.occupied ? "Full" : "Allocate"}
+                {table.occupied ? "Full" : "Available"}
               </span>
             </div>
 
             {table.occupied && table.order ? (
-              <div className="mt-4 text-sm text-brand-cream/75">
-                <p className="font-display text-xl text-brand-gold">{displayOrderNumber(table.order.serialNumber)}</p>
-                <p className="break-words">{table.order.userName}</p>
-                <p>{formatINR(table.order.totalAmount)}</p>
+              <div className="mt-4 space-y-3 text-sm text-brand-cream/75">
+                <div>
+                  <p className="font-display text-xl text-brand-gold">{displayOrderNumber(table.order.serialNumber)}</p>
+                  <p className="break-words">{table.order.userName}</p>
+                  <p>{formatINR(table.order.totalAmount)}</p>
+                </div>
+                <button
+                  type="button"
+                  disabled={busy === table.number}
+                  onClick={() => freeTable(table)}
+                  className="min-h-11 w-full rounded-full border border-emerald-400/40 px-4 py-2 text-sm text-emerald-300"
+                >
+                  {busy === table.number ? "Freeing..." : "Free"}
+                </button>
               </div>
             ) : (
               <div className="mt-4 space-y-3">
@@ -117,10 +149,11 @@ export default function KitchenTablesPage() {
                     </select>
                     <button
                       type="button"
+                      disabled={busy === table.number}
                       onClick={() => allocate(table.number)}
                       className="btn-glow w-full px-4 py-2.5 text-sm"
                     >
-                      Allocate
+                      {busy === table.number ? "Saving..." : "Allocate"}
                     </button>
                   </>
                 )}

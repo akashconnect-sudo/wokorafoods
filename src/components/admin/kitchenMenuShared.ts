@@ -5,6 +5,8 @@ export type KitchenItem = {
   name: string;
   description: string;
   price: number;
+  halfPrice?: number | null;
+  fullPrice?: number | null;
   imageUrl: string;
   isVeg: boolean;
   isAvailable: boolean;
@@ -13,7 +15,15 @@ export type KitchenItem = {
   category: KitchenCategory;
 };
 
-export const emptyVariation = { name: "", description: "", price: "", imageUrl: "", isVeg: true };
+export const emptyVariation = {
+  name: "",
+  description: "",
+  price: "",
+  halfPrice: "",
+  fullPrice: "",
+  imageUrl: "",
+  isVeg: true,
+};
 
 export async function fetchKitchenMenu() {
   const res = await fetch("/api/menu?all=true");

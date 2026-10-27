@@ -209,7 +209,7 @@ export default function AdminOrdersPage() {
                         order.tableNumber !== table;
                       return (
                         <option key={table} value={table}>
-                          {occupied ? `Table ${table} · Full` : `Table ${table} · Allocate`}
+                          {occupied ? `Table ${table} · Full` : `Table ${table} · Available`}
                         </option>
                       );
                     })}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
-import { GST_RATE, displayOrderNumber, formatINR } from "@/lib/constants";
+import { GST_RATE, TABLE_COUNT, displayOrderNumber, formatINR } from "@/lib/constants";
 import { cartSubtotal, useCartStore } from "@/store/cartStore";
 import { useCartAccess } from "@/hooks/useCartAccess";
 import { userFacingError } from "@/lib/publicError";
@@ -14,12 +14,14 @@ import { openRazorpayCheckout } from "@/lib/razorpayCheckout";
 export default function CartPage() {
   const router = useRouter();
   const { status, isAdmin, canUseCart } = useCartAccess();
-  const { items, increment, decrement, removeItem, orderType, setOrderType, clear } = useCartStore();
+  const { items, increment, decrement, removeItem, tableNumber, setTableNumber, orderType, setOrderType, clear } =
+    useCartStore();
   const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "cash">("upi");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [cashOrder, setCashOrder] = useState<{ id: string; serialNumber: number; totalAmount: number; paymentStatus: string } | null>(null);
+  const [tables, setTables] = useState<{ number: string; occupied: boolean }[]>([]);
 
   const subtotal = cartSubtotal(items);
   const tax = Math.round(subtotal * GST_RATE);
@@ -28,6 +30,20 @@ export default function CartPage() {
   useEffect(() => {
     if (isAdmin) router.replace("/admin");
   }, [isAdmin, router]);
+
+  useEffect(() => {
+    if (orderType !== "dine_in") return;
+    const loadTables = () =>
+      fetch("/api/tables")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (Array.isArray(data?.tables)) setTables(data.tables);
+        })
+        .catch(() => undefined);
+    loadTables();
+    const timer = setInterval(loadTables, 5000);
+    return () => clearInterval(timer);
+  }, [orderType]);
 
   useEffect(() => {
     if (!cashOrder || cashOrder.paymentStatus === "paid") return;
@@ -66,6 +82,7 @@ export default function CartPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: orderType,
+          tableNumber: orderType === "dine_in" ? tableNumber || undefined : undefined,
           notes,
           paymentMethod,
           items: items.map((item) => ({
@@ -213,7 +230,27 @@ export default function CartPage() {
           ))}
         </div>
         {orderType === "dine_in" ? (
-          <p className="mt-4 text-sm text-brand-cream/60">Kitchen will assign your table after the order is placed.</p>
+          <label className="mt-4 block text-sm">
+            Table
+            <select
+              value={tableNumber}
+              onChange={(event) => setTableNumber(event.target.value)}
+              className="field-input mt-2"
+            >
+              <option value="">Select table</option>
+              {Array.from({ length: TABLE_COUNT }, (_, index) => String(index + 1)).map((table) => {
+                const occupied = tables.find((row) => row.number === table)?.occupied;
+                return (
+                  <option key={table} value={table}>
+                    {occupied ? `Table ${table} · Full` : `Table ${table} · Available`}
+                  </option>
+                );
+              })}
+            </select>
+            <span className="mt-2 block text-xs text-brand-cream/55">
+              Available tables are free. Kitchen can still re-assign after you order.
+            </span>
+          </label>
         ) : null}
         <div className="mt-4">
           <p className="text-sm">Payment</p>

@@ -13,6 +13,23 @@ export type OptionGroup = {
 
 export type CustomizeSelections = Record<string, string[]>;
 
+export type PortionPrices = {
+  price: number;
+  halfPrice?: number | null;
+  fullPrice?: number | null;
+};
+
+/** Categories that use Half / Full portion pricing on the paper menu. */
+export const PORTION_CATEGORIES = new Set([
+  "momos",
+  "noodles",
+  "fried-rice",
+  "chilli-potato",
+  "spring-rolls",
+  "wraps",
+  "chicken-lollipop",
+]);
+
 const spice: OptionGroup = {
   id: "spice",
   label: "Spice level",
@@ -36,6 +53,18 @@ function sizeGroup(largeDelta: number, largeLabel = "Large"): OptionGroup {
   };
 }
 
+function portionGroup(fullDelta: number): OptionGroup {
+  return {
+    id: "size",
+    label: "Choose portion",
+    type: "single",
+    options: [
+      { id: "half", label: "Half", priceDelta: 0 },
+      { id: "full", label: "Full", priceDelta: Math.max(0, fullDelta) },
+    ],
+  };
+}
+
 const GROUPS: Record<string, OptionGroup[]> = {
   burger: [
     sizeGroup(40),
@@ -52,15 +81,7 @@ const GROUPS: Record<string, OptionGroup[]> = {
     spice,
   ],
   momos: [
-    {
-      id: "size",
-      label: "Choose your size",
-      type: "single",
-      options: [
-        { id: "regular", label: "8 pieces", priceDelta: 0 },
-        { id: "large", label: "12 pieces", priceDelta: 50 },
-      ],
-    },
+    portionGroup(50),
     {
       id: "extras",
       label: "Add extras",
@@ -74,15 +95,7 @@ const GROUPS: Record<string, OptionGroup[]> = {
     spice,
   ],
   "spring-rolls": [
-    {
-      id: "size",
-      label: "Choose your size",
-      type: "single",
-      options: [
-        { id: "regular", label: "4 pieces", priceDelta: 0 },
-        { id: "large", label: "8 pieces", priceDelta: 40 },
-      ],
-    },
+    portionGroup(40),
     {
       id: "extras",
       label: "Add extras",
@@ -95,7 +108,7 @@ const GROUPS: Record<string, OptionGroup[]> = {
     spice,
   ],
   noodles: [
-    sizeGroup(40),
+    portionGroup(50),
     {
       id: "extras",
       label: "Add extras",
@@ -109,7 +122,7 @@ const GROUPS: Record<string, OptionGroup[]> = {
     spice,
   ],
   "chilli-potato": [
-    sizeGroup(40),
+    portionGroup(50),
     {
       id: "extras",
       label: "Add extras",
@@ -122,7 +135,7 @@ const GROUPS: Record<string, OptionGroup[]> = {
     spice,
   ],
   "fried-rice": [
-    sizeGroup(40),
+    portionGroup(50),
     {
       id: "extras",
       label: "Add extras",
@@ -136,7 +149,7 @@ const GROUPS: Record<string, OptionGroup[]> = {
     spice,
   ],
   wraps: [
-    sizeGroup(30),
+    portionGroup(30),
     {
       id: "extras",
       label: "Add extras",
@@ -150,15 +163,7 @@ const GROUPS: Record<string, OptionGroup[]> = {
     spice,
   ],
   "chicken-lollipop": [
-    {
-      id: "size",
-      label: "Choose your size",
-      type: "single",
-      options: [
-        { id: "regular", label: "6 pieces", priceDelta: 0 },
-        { id: "large", label: "10 pieces", priceDelta: 80 },
-      ],
-    },
+    portionGroup(80),
     {
       id: "extras",
       label: "Add extras",
@@ -197,10 +202,49 @@ function withChickenExtra(groups: OptionGroup[], isVeg: boolean): OptionGroup[] 
   });
 }
 
-export function optionGroupsFor(category: string, isVeg: boolean): OptionGroup[] {
+export function resolvePortionPrices(portions?: PortionPrices | null) {
+  const base = Number(portions?.price || 0);
+  const half = portions?.halfPrice != null && portions.halfPrice > 0 ? Number(portions.halfPrice) : base;
+  const full =
+    portions?.fullPrice != null && portions.fullPrice > 0
+      ? Number(portions.fullPrice)
+      : null;
+  return { half, full };
+}
+
+function applyPortionPrices(groups: OptionGroup[], category: string, portions?: PortionPrices | null): OptionGroup[] {
+  const { half, full } = resolvePortionPrices(portions);
+  const wantsPortion =
+    (full != null && full > 0) ||
+    PORTION_CATEGORIES.has(category) ||
+    groups.some((group) => group.options.some((option) => option.id === "half" || option.id === "full"));
+
+  if (!wantsPortion) return groups;
+
+  const existingSize = groups.find((group) => group.id === "size");
+  const fallbackDelta =
+    existingSize?.options.find((option) => option.id === "full" || option.id === "large")?.priceDelta ?? 50;
+  const fullDelta = full != null && full > 0 ? Math.max(0, full - half) : fallbackDelta;
+
+  const nextPortion = portionGroup(fullDelta);
+  if (!existingSize) return [nextPortion, ...groups];
+  return groups.map((group) => (group.id === "size" ? nextPortion : group));
+}
+
+export function optionGroupsFor(
+  category: string,
+  isVeg: boolean,
+  portions?: PortionPrices | null
+): OptionGroup[] {
   const groups = GROUPS[category] || [];
-  if (category === "coffee" || category === "chicken-lollipop") return groups;
-  return withChickenExtra(groups, isVeg);
+  if (category === "coffee") return groups;
+  const withPortions = applyPortionPrices(groups, category, portions);
+  if (category === "chicken-lollipop") return withPortions;
+  return withChickenExtra(withPortions, isVeg);
+}
+
+export function basePriceForItem(portions?: PortionPrices | null) {
+  return resolvePortionPrices(portions).half;
 }
 
 export function defaultSelections(groups: OptionGroup[]): CustomizeSelections {
@@ -257,6 +301,8 @@ export type CartableItem = {
   price: number;
   imageUrl: string;
   isVeg: boolean;
+  halfPrice?: number | null;
+  fullPrice?: number | null;
   optionGroups?: OptionGroup[];
 };
 
@@ -264,11 +310,12 @@ export function defaultCartLine(item: CartableItem) {
   const groups = item.optionGroups || [];
   const selections = defaultSelections(groups);
   const configKey = configKeyFromSelections(selections);
+  const base = basePriceForItem(item);
   return {
     id: cartLineId(item.id, configKey),
     menuItemId: item.id,
     name: item.name,
-    price: unitPriceFromSelections(item.price, groups, selections),
+    price: unitPriceFromSelections(base, groups, selections),
     imageUrl: item.imageUrl,
     isVeg: item.isVeg,
     configKey,

@@ -11,6 +11,7 @@ import { recordPayment } from "@/lib/payments";
 import { assertSameOrigin, rateLimit } from "@/lib/security";
 import { serverErrorJson } from "@/lib/publicError";
 import {
+  basePriceForItem,
   optionGroupsFor,
   sanitizeSelections,
   summaryFromSelections,
@@ -90,9 +91,15 @@ export async function POST(request: Request) {
 
   const priced = items.map((item) => {
     const menuItem = menuItems.find((row) => row.id === item.menuItemId)!;
-    const groups = optionGroupsFor(menuItem.category.slug, menuItem.isVeg);
+    const portions = {
+      price: menuItem.price,
+      halfPrice: menuItem.halfPrice,
+      fullPrice: menuItem.fullPrice,
+    };
+    const groups = optionGroupsFor(menuItem.category.slug, menuItem.isVeg, portions);
     const selections = sanitizeSelections(groups, item.selections);
-    const unitPrice = unitPriceFromSelections(menuItem.price, groups, selections);
+    const base = basePriceForItem(portions);
+    const unitPrice = unitPriceFromSelections(base, groups, selections);
     const customization = item.customization || summaryFromSelections(groups, selections);
     return {
       menuItem,

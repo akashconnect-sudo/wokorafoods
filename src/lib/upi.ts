@@ -65,7 +65,6 @@ export function buildUpiQuery(options: {
     .join("&");
 }
 
-/** Generic intent — Android shows every installed UPI app. */
 export function upiPayUri(query: string) {
   return `upi://pay?${query}`;
 }

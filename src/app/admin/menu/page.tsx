@@ -130,7 +130,9 @@ function AdminMenuInner() {
       body: JSON.stringify({
         ...form,
         categoryId: category.id,
-        price: Number(form.price),
+        price: Number(form.halfPrice || form.price),
+        halfPrice: Number(form.halfPrice || form.price),
+        fullPrice: form.fullPrice === "" ? null : Number(form.fullPrice),
         isAvailable: false,
       }),
     });
@@ -193,13 +195,7 @@ function AdminMenuInner() {
             className="field-input"
             placeholder="Item name"
           />
-          <input
-            value={draft.price}
-            onChange={(event) => setDraft({ ...draft, price: event.target.value })}
-            className="field-input"
-            placeholder="Price"
-          />
-          <label className="flex min-h-11 items-center gap-2 text-sm">
+          <label className="flex min-h-11 items-center gap-2 text-sm md:row-start-2">
             <input
               type="checkbox"
               checked={draft.isVeg}
@@ -207,6 +203,26 @@ function AdminMenuInner() {
             />
             Vegetarian
           </label>
+          <input
+            value={draft.halfPrice}
+            onChange={(event) =>
+              setDraft({
+                ...draft,
+                halfPrice: event.target.value,
+                price: event.target.value,
+              })
+            }
+            className="field-input"
+            placeholder="Half price"
+            inputMode="decimal"
+          />
+          <input
+            value={draft.fullPrice}
+            onChange={(event) => setDraft({ ...draft, fullPrice: event.target.value })}
+            className="field-input"
+            placeholder="Full price"
+            inputMode="decimal"
+          />
           <div className="md:col-span-2">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5">
               {draft.imageUrl ? (
@@ -245,10 +261,14 @@ function AdminMenuInner() {
               type="button"
               onClick={async () => {
                 try {
+                  const half = Number(draft.halfPrice || draft.price);
+                  const full = draft.fullPrice === "" ? null : Number(draft.fullPrice);
                   await patchKitchenItem(item.id, {
                     name: draft.name,
                     description: draft.description,
-                    price: Number(draft.price),
+                    price: half,
+                    halfPrice: half,
+                    fullPrice: full,
                     imageUrl: draft.imageUrl,
                     isVeg: draft.isVeg,
                   });
@@ -286,7 +306,13 @@ function AdminMenuInner() {
               </span>
               <span className="min-w-0">
                 <span className="block font-display text-base font-semibold leading-tight line-clamp-2">{item.name}</span>
-                <span className="mt-1 block font-display text-sm text-brand-gold">{formatINR(item.price)}</span>
+                <span className="mt-1 block font-display text-sm text-brand-gold">
+                  {item.halfPrice || item.fullPrice
+                    ? `Half ${formatINR(item.halfPrice || item.price)}${
+                        item.fullPrice ? ` · Full ${formatINR(item.fullPrice)}` : ""
+                      }`
+                    : formatINR(item.price)}
+                </span>
               </span>
             </span>
           </div>
@@ -316,7 +342,9 @@ function AdminMenuInner() {
                 setDraft({
                   name: item.name,
                   description: item.description,
-                  price: String(item.price),
+                  price: String(item.halfPrice || item.price),
+                  halfPrice: String(item.halfPrice || item.price),
+                  fullPrice: item.fullPrice != null ? String(item.fullPrice) : "",
                   imageUrl: item.imageUrl,
                   isVeg: item.isVeg,
                 });
@@ -438,10 +466,24 @@ function AdminMenuInner() {
               />
               <input
                 required
-                value={form.price}
-                onChange={(event) => setForm({ ...form, price: event.target.value })}
-                placeholder="Price"
+                value={form.halfPrice || form.price}
+                onChange={(event) =>
+                  setForm({
+                    ...form,
+                    halfPrice: event.target.value,
+                    price: event.target.value,
+                  })
+                }
+                placeholder="Half price"
                 className="field-input"
+                inputMode="decimal"
+              />
+              <input
+                value={form.fullPrice}
+                onChange={(event) => setForm({ ...form, fullPrice: event.target.value })}
+                placeholder="Full price"
+                className="field-input sm:col-span-2"
+                inputMode="decimal"
               />
               <div className="sm:col-span-2">
                 <p className="text-sm text-brand-cream/70">Photo</p>

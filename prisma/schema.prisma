@@ -82,6 +82,8 @@ model MenuItem {
   category    Category    @relation(fields: [categoryId], references: [id])
   description String
   price       Float
+  halfPrice   Float?
+  fullPrice   Float?
   imageUrl    String
   isVeg       Boolean     @default(true)
   isAvailable Boolean     @default(true)

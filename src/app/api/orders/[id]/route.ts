@@ -183,7 +183,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     etaMinutes?: number;
     etaSetAt?: Date;
     paymentStatus?: string;
-    tableNumber?: string;
+    tableNumber?: string | null;
   } = {};
   let assignedTable = "";
 
@@ -206,7 +206,11 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     data.paymentStatus = payStatus;
   }
 
-  if (typeof body.tableNumber === "string") {
+  if (body.tableNumber === null || body.tableNumber === "") {
+    if (existing.type === "dine_in" && existing.tableNumber) {
+      data.tableNumber = null;
+    }
+  } else if (typeof body.tableNumber === "string") {
     const nextTable = body.tableNumber.trim();
     const allowed = new Set(Array.from({ length: TABLE_COUNT }, (_, index) => String(index + 1)));
     if (!allowed.has(nextTable)) {
