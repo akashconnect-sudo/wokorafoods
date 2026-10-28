@@ -11,7 +11,6 @@ import { useCartAccess } from "@/hooks/useCartAccess";
 export function DishNameRow({ item }: { item: FoodCardItem }) {
   const { ensureCart, canUseCart } = useCartAccess();
   const groups = item.optionGroups?.length ? item.optionGroups : [];
-  const hasPortion = groups.some((group) => group.id === "size" && group.options.some((o) => o.id === "half"));
   const needsCustomize = groups.length > 0;
   const lineId = defaultLineId(item);
   const cartItem = useCartStore((state) => state.items.find((row) => row.id === lineId));
