@@ -28,7 +28,7 @@ function CategoryMenuInner() {
   }, [searchParams]);
 
   useEffect(() => {
-    fetch("/api/menu")
+    fetch("/api/menu", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => setItems(data.items || []))
       .catch(() => setItems([]));

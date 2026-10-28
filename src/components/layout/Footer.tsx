@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Clock, MapPin, Phone, Mail } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
@@ -62,8 +62,31 @@ export function Footer() {
   const pathname = usePathname();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [plates, setPlates] = useState<{ slug: string; name: string; image: string }[]>(
+    CATEGORY_META.map((row) => ({ slug: row.slug, name: row.name, image: row.image }))
+  );
   const { address } = useCafeAddress();
   const { isAdmin } = useCartAccess();
+
+  useEffect(() => {
+    fetch("/api/menu", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const rows = (data?.categories || []) as { slug: string; name: string; iconUrl?: string | null }[];
+        if (!rows.length) return;
+        setPlates(
+          rows.map((row) => {
+            const fallback = CATEGORY_META.find((meta) => meta.slug === row.slug);
+            return {
+              slug: row.slug,
+              name: row.name,
+              image: row.iconUrl || fallback?.image || "",
+            };
+          })
+        );
+      })
+      .catch(() => undefined);
+  }, []);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -109,21 +132,25 @@ export function Footer() {
         <div className="mt-10">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-cream/45">Jump to a plate</p>
           <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9">
-            {CATEGORY_META.map((category) => (
+            {plates.map((category) => (
               <MenuJump
                 key={category.slug}
                 slug={category.slug}
                 className="group overflow-hidden rounded-2xl border border-white/10 bg-black/40 transition hover:border-brand-yellow/50"
               >
                 <span className="relative block aspect-square">
-                  <Image
-                    src={category.image}
-                    alt={category.name}
-                    fill
-                    sizes="120px"
-                    unoptimized
-                    className="object-cover transition duration-500 group-hover:scale-110"
-                  />
+                  {category.image ? (
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      fill
+                      sizes="120px"
+                      unoptimized
+                      className="object-cover transition duration-500 group-hover:scale-110"
+                    />
+                  ) : (
+                    <span className="absolute inset-0 bg-white/5" />
+                  )}
                   <span className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                   <span className="absolute inset-x-1 bottom-1 line-clamp-2 text-center font-display text-[10px] font-semibold leading-tight text-white sm:text-xs">
                     {category.name}

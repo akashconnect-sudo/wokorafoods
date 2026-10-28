@@ -14,7 +14,12 @@ export type MenuViewItem = {
   category: { name: string; slug: string };
 };
 
-export type MenuViewCategory = { id?: string; name: string; slug: string };
+export type MenuViewCategory = {
+  id?: string;
+  name: string;
+  slug: string;
+  iconUrl?: string | null;
+};
 
 export type MenuPlate = {
   category: MenuViewCategory;
@@ -48,13 +53,15 @@ export function buildCategoryPlates(categories: MenuViewCategory[], filtered: Me
     if (!dishes.length) return [];
     const featured = dishes.find((item) => item.isFeatured) || dishes[0];
     const meta = CATEGORY_META.find((row) => row.slug === category.slug);
+    const kitchenImage = (category.iconUrl || "").trim();
     return [
       {
         category,
         featured,
         count: dishes.length,
         fromPrice: Math.min(...dishes.map((item) => item.price)),
-        image: featured.imageUrl || meta?.image || "",
+        // Kitchen category photo wins, then dish photo, then built-in fallback art.
+        image: kitchenImage || featured.imageUrl || meta?.image || "",
       },
     ];
   });

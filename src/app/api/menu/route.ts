@@ -17,11 +17,15 @@ export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   const storeId = session?.user.storeId || DEFAULT_STORE_ID;
   const showHidden = session?.user.role === "admin" && searchParams.get("all") === "true";
-  const cacheKey = menuCacheKey(storeId, `hf3:${showHidden ? "all" : "pub"}:${category || ""}:${q || ""}:${featured}`);
+  const cacheKey = menuCacheKey(storeId, `hf4:${showHidden ? "all" : "pub"}:${category || ""}:${q || ""}:${featured}`);
 
   if (!q) {
     const cached = await cacheGet<{ items: unknown; categories: unknown }>(cacheKey);
-    if (cached) return NextResponse.json(cached);
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: { "Cache-Control": "no-store, max-age=0" },
+      });
+    }
   }
 
   const items = await prisma.menuItem.findMany({
@@ -72,7 +76,9 @@ export async function GET(request: Request) {
     categories,
   };
   if (!q) await cacheSet(cacheKey, payload);
-  return NextResponse.json(payload);
+  return NextResponse.json(payload, {
+    headers: { "Cache-Control": "no-store, max-age=0" },
+  });
   } catch (error) {
     console.error("[menu GET]", error);
     return serverErrorJson();

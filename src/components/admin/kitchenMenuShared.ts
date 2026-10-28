@@ -32,7 +32,7 @@ export const emptyVariation = {
 };
 
 export async function fetchKitchenMenu() {
-  const res = await fetch("/api/menu?all=true");
+  const res = await fetch("/api/menu?all=true", { cache: "no-store" });
   const data = await res.json();
   return {
     items: (data.items || []) as KitchenItem[],

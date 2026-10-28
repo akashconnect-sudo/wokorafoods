@@ -14,7 +14,7 @@ type MenuItem = FoodCardItem & {
   isFeatured?: boolean;
 };
 
-type Category = { id: string; name: string; slug: string };
+type Category = { id: string; name: string; slug: string; iconUrl?: string | null };
 
 function MenuPageInner() {
   const searchParams = useSearchParams();
@@ -42,7 +42,7 @@ function MenuPageInner() {
   }, [router, searchParams]);
 
   useEffect(() => {
-    fetch("/api/menu")
+    fetch("/api/menu", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         setItems(data.items || []);
