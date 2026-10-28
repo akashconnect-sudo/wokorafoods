@@ -20,7 +20,6 @@ export function StickyCartBar() {
 
   return (
     <>
-      <div className={onPlatePage ? "h-16 sm:h-20 md:hidden" : aboveNav ? "h-16 sm:h-20" : "h-20"} aria-hidden />
       <div
         className={`pointer-events-none fixed inset-x-0 z-[45] px-3 sm:px-4 ${
           onPlatePage ? "md:hidden " : ""
@@ -32,9 +31,9 @@ export function StickyCartBar() {
       >
         <Link
           href="/cart"
-          className="pointer-events-auto mx-auto flex max-w-xl items-center justify-between gap-3 rounded-full bg-brand-yellow px-4 py-3 text-white shadow-[0_12px_40px_rgba(232,39,44,0.45)] sm:px-5"
+          className="pointer-events-auto mx-auto flex max-w-xl items-center justify-between gap-3 rounded-full bg-brand-yellow px-4 py-3 text-black shadow-[0_12px_40px_rgba(255,200,0,0.45)] sm:px-5"
         >
-          <span className="min-w-0 truncate text-sm font-medium">
+          <span className="min-w-0 break-words text-sm font-medium leading-snug">
             {count} {count === 1 ? "item" : "items"} · {formatINR(total)}
           </span>
           <span className="shrink-0 font-display text-sm font-semibold tracking-wide">VIEW CART</span>

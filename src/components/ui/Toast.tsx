@@ -32,7 +32,7 @@ export function ToastHost() {
   if (!show) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-24 z-[90] flex justify-center px-4 lg:bottom-8">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(8.5rem+env(safe-area-inset-bottom,0px))] z-[90] flex justify-center px-4 md:bottom-8">
       <p className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ink shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
         {message}
       </p>

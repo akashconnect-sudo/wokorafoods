@@ -16,7 +16,7 @@ export function DietGate({
   onPick: (value: Exclude<DietPreference, "all"> | "all") => void;
 }) {
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl flex-col justify-center px-4 py-8 sm:px-6">
+    <section className="page-bottom mx-auto flex min-h-[calc(100svh-4rem-env(safe-area-inset-top,0px))] max-w-6xl flex-col justify-center page-pad py-8">
       <p className="text-sm uppercase tracking-[0.28em] text-brand-gold">Hi {name}</p>
       <h1 className="mt-2 font-display text-3xl font-bold sm:text-5xl lg:text-6xl">What are you eating?</h1>
       <p className="mt-3 max-w-xl text-brand-cream/65">

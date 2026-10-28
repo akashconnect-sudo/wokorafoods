@@ -108,12 +108,12 @@ export default function AboutPage() {
   const { address, mapSrc } = useCafeAddress();
 
   return (
-    <div>
+    <div className="page-bottom">
       <section className="dark-band relative overflow-hidden">
         <div className="pointer-events-none absolute -left-24 top-8 h-72 w-72 rounded-full bg-brand-yellow/20 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-brand-gold/10 blur-3xl" />
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:py-16">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 page-pad py-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:py-16">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-gold">About us</p>
             <motion.h1
@@ -168,8 +168,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <nav aria-label="On this page" className="sticky top-14 z-30 border-y border-white/10 bg-ink/90 backdrop-blur-xl sm:top-16">
-        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-3 no-scrollbar sm:px-6 sm:justify-center">
+      <nav
+        aria-label="On this page"
+        className="sticky z-30 border-y border-white/10 bg-ink/90 backdrop-blur-xl"
+        style={{ top: "calc(3.5rem + env(safe-area-inset-top, 0px))" }}
+      >
+        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto page-pad py-3 no-scrollbar sm:justify-center">
           {NAV.map((item) => (
             <a
               key={item.href}
@@ -182,7 +186,7 @@ export default function AboutPage() {
         </div>
       </nav>
 
-      <section id="who" className="scroll-mt-28 mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+      <section id="who" className="scroll-mt-32 mx-auto max-w-6xl page-pad py-16 sm:py-20">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">Who we are</p>
         <h2 className="heading-underline mt-2 font-display text-3xl font-bold sm:text-4xl">The name on the door is the name on the plate.</h2>
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-brand-cream/75 sm:text-lg">
@@ -207,8 +211,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section id="menu" className="scroll-mt-28 border-y border-white/10 bg-black/35 py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <section id="menu" className="scroll-mt-32 border-y border-white/10 bg-black/35 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl page-pad">
           <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">What we cook</p>
@@ -258,7 +262,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section id="order" className="scroll-mt-28 mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+      <section id="order" className="scroll-mt-32 mx-auto max-w-6xl page-pad py-16 sm:py-20">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">How to order</p>
         <h2 className="heading-underline mt-2 font-display text-3xl font-bold sm:text-4xl">Four steps. No counter line.</h2>
         <p className="mt-4 max-w-2xl text-brand-cream/65">
@@ -303,7 +307,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section id="visit" className="scroll-mt-28 mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+      <section id="visit" className="scroll-mt-32 mx-auto max-w-6xl page-pad py-16 sm:py-20">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">Visit us</p>
         <h2 className="heading-underline mt-2 font-display text-3xl font-bold sm:text-4xl">Come to {BRAND.name}.</h2>
         <div className="mt-10 card-surface overflow-hidden lg:grid lg:grid-cols-2">

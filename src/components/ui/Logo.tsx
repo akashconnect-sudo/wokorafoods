@@ -13,7 +13,7 @@ export function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
         width={1509}
         height={574}
         priority
-        className={`${height} w-auto shrink-0 object-contain`}
+        className={`${height} w-auto max-w-[7.5rem] object-contain object-left sm:max-w-[9.5rem]`}
       />
     </Link>
   );

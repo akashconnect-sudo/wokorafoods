@@ -101,18 +101,18 @@ export default function OrderPage() {
         </div>
       ) : null}
 
-      <div className="mt-8 flex justify-between">
+      <div className="mt-8 flex justify-between gap-1">
         {STEPS.map((step, index) => (
-          <div key={step} className="flex flex-1 flex-col items-center">
-            <div className={`h-3 w-3 rounded-full ${index <= stepIndex ? "bg-brand-yellow shadow-neon" : "bg-white/20"}`} />
-            <p className="mt-2 text-[10px] uppercase tracking-wide text-brand-cream/60 sm:text-[11px]">
+          <div key={step} className="flex min-w-0 flex-1 flex-col items-center px-0.5">
+            <div className={`h-3 w-3 shrink-0 rounded-full ${index <= stepIndex ? "bg-brand-yellow shadow-neon" : "bg-white/20"}`} />
+            <p className="mt-2 text-center text-[9px] uppercase leading-tight tracking-wide text-brand-cream/60 xs:text-[10px] sm:text-[11px]">
               {step === "served" ? "Delivered" : step}
             </p>
           </div>
         ))}
       </div>
 
-      <article className="card-surface mt-10 p-6 font-mono text-sm">
+      <article className="card-surface mt-10 min-w-0 overflow-hidden p-4 font-mono text-sm sm:p-6">
         <p>Wokora Foods</p>
         <p>
           Type:{" "}

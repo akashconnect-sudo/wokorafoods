@@ -97,9 +97,9 @@ export function Footer() {
             </p>
             <div className="mt-3 space-y-1 text-sm text-brand-cream/80">
               {BRAND.hours.map((row) => (
-                <p key={row.day} className="flex items-baseline justify-between gap-4">
+                <p key={row.day} className="flex flex-col gap-0.5 xs:flex-row xs:items-baseline xs:justify-between xs:gap-4">
                   <span className="text-white">{row.day.split("–")[0].trim()}</span>
-                  <span className="shrink-0 text-brand-yellow">{row.time}</span>
+                  <span className="text-brand-yellow xs:shrink-0">{row.time}</span>
                 </p>
               ))}
             </div>
@@ -215,9 +215,9 @@ export function Footer() {
               <button className="btn-glow shrink-0 px-5 py-2.5 text-sm">Join</button>
             </div>
             {message && <p className="mt-2 text-xs text-brand-yellow">{message}</p>}
-            <div className="mt-4 flex items-center justify-between gap-4 border-t border-white/10 pt-3">
+            <div className="mt-4 flex flex-col gap-2 border-t border-white/10 pt-3 xs:flex-row xs:items-center xs:justify-between xs:gap-4">
               <Image src="/images/brand/fssai.svg" alt="FSSAI" width={96} height={36} unoptimized className="h-8 w-auto sm:h-9" />
-              <p className="shrink-0 font-display text-xs tabular-nums tracking-[0.16em] text-[#E87722] sm:text-sm">
+              <p className="min-w-0 break-all font-display text-xs tabular-nums tracking-wide text-[#E87722] sm:text-sm sm:tracking-[0.12em]">
                 {BRAND.fssai.number}
               </p>
             </div>

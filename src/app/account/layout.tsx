@@ -32,15 +32,15 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-ink">
       <div className="border-b border-white/10">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-2 px-4 py-3 sm:flex sm:overflow-x-auto sm:px-6">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-2 page-pad py-3 sm:flex sm:overflow-x-auto">
           {TABS.map((tab) => {
             const active = pathname === tab.href;
             return (
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={`flex min-h-11 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm sm:shrink-0 sm:px-4 ${
-                  active ? "bg-brand-yellow text-white" : "border border-white/10 text-brand-cream/70"
+                className={`flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm sm:shrink-0 sm:px-4 ${
+                  active ? "bg-brand-yellow text-black" : "border border-white/10 text-brand-cream/70"
                 }`}
               >
                 <tab.icon className="h-4 w-4" />

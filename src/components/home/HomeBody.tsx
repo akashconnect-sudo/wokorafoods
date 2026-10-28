@@ -36,7 +36,7 @@ const CtaBanner = dynamic(
 
 export function HomeBody() {
   return (
-    <>
+    <div className="page-bottom">
       <Hero />
       <LazyReveal minHeight={360}>
         <CategoryStrip />
@@ -62,6 +62,6 @@ export function HomeBody() {
       <LazyReveal minHeight={200}>
         <CtaBanner />
       </LazyReveal>
-    </>
+    </div>
   );
 }

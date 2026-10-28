@@ -57,10 +57,10 @@ export function ExploreMenu({
           />
         </div>
       </div>
-      <div className="no-scrollbar mt-5 flex gap-5 overflow-x-auto pb-3">
-        <button type="button" onClick={() => onActive("all")} className="w-[76px] shrink-0 text-center">
+      <div className="no-scrollbar mt-5 flex gap-4 overflow-x-auto pb-3 xs:gap-5">
+        <button type="button" onClick={() => onActive("all")} className="w-[4.75rem] shrink-0 text-center xs:w-20">
           <span
-            className={`mx-auto grid h-[76px] w-[76px] place-items-center rounded-full border-2 text-xs font-semibold ${
+            className={`mx-auto grid h-[4.75rem] w-[4.75rem] place-items-center rounded-full border-2 text-xs font-semibold xs:h-20 xs:w-20 ${
               active === "all" ? "border-brand-yellow bg-brand-yellow/20" : "border-white/15 bg-white/5"
             }`}
           >
@@ -76,20 +76,24 @@ export function ExploreMenu({
               key={category.slug}
               type="button"
               onClick={() => onActive(category.slug)}
-              className="w-[76px] shrink-0 text-center"
+              className="w-[4.75rem] shrink-0 text-center xs:w-20"
             >
               <span
-                className={`relative mx-auto block h-[76px] w-[76px] overflow-hidden rounded-full border-2 ${
+                className={`relative mx-auto block h-[4.75rem] w-[4.75rem] overflow-hidden rounded-full border-2 xs:h-20 xs:w-20 ${
                   selected ? "border-brand-yellow shadow-[0_0_18px_rgba(232,39,44,0.45)]" : "border-white/15"
                 }`}
               >
                 {image ? (
-                  <Image src={image} alt="" fill className="object-cover" sizes="76px" unoptimized />
+                  <Image src={image} alt="" fill className="object-cover" sizes="80px" unoptimized />
                 ) : (
                   <span className="grid h-full place-items-center bg-white/5 px-1 text-[10px] leading-tight">{category.name}</span>
                 )}
               </span>
-              <span className={`mt-2 block truncate text-xs ${selected ? "text-brand-gold" : "text-brand-cream/70"}`}>
+              <span
+                className={`mt-2 block text-[11px] leading-tight line-clamp-2 xs:text-xs ${
+                  selected ? "text-brand-gold" : "text-brand-cream/70"
+                }`}
+              >
                 {category.name}
               </span>
             </button>

@@ -51,8 +51,10 @@ export function CategoryPlateGrid({
           </div>
           <div className="space-y-3 p-4">
             <div className="flex items-start justify-between gap-3">
-              <h2 className="min-w-0 truncate font-display text-lg font-semibold">{category.name}</h2>
-              <p className="font-display text-brand-gold">{formatINR(fromPrice)}</p>
+              <h2 className="min-w-0 break-words font-display text-lg font-semibold leading-tight line-clamp-2">
+                {category.name}
+              </h2>
+              <p className="shrink-0 font-display text-brand-gold">from {formatINR(fromPrice)}</p>
             </div>
             <p className="line-clamp-2 text-sm text-brand-cream/65">
               {count} {count === 1 ? "dish" : "dishes"}. {featured.description}

@@ -134,7 +134,7 @@ export function CustomizeItemPanel({
   const addToCart = () => {
     if (!ensureCart()) return;
     if (hasPortion && !portionSelected) {
-      toast("Pehle Half ya Full choose karo");
+      toast("Please choose Half or Full first");
       return;
     }
     const configKey = configKeyFromSelections(selections);
@@ -286,9 +286,9 @@ export function CustomizeItemPanel({
                               : "border-white/10 bg-white/5 text-brand-cream"
                           }`}
                         >
-                          <span className="flex min-w-0 items-center gap-2.5">
+                          <span className="flex min-w-0 flex-1 items-start gap-2.5">
                             <span
-                              className={`grid h-4 w-4 shrink-0 place-items-center border ${
+                              className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center border ${
                                 group.type === "single" ? "rounded-full" : "rounded-[3px]"
                               } ${selected ? "border-brand-yellow" : "border-white/35"}`}
                             >
@@ -300,12 +300,16 @@ export function CustomizeItemPanel({
                                 />
                               ) : null}
                             </span>
-                            <span className={`text-sm font-semibold ${selected ? "text-brand-yellow" : ""}`}>
+                            <span
+                              className={`min-w-0 break-words text-sm font-semibold ${
+                                selected ? "text-brand-yellow" : ""
+                              }`}
+                            >
                               {option.label}
                             </span>
                           </span>
                           <span
-                            className={`font-display text-sm font-semibold ${
+                            className={`shrink-0 font-display text-sm font-semibold ${
                               selected ? "text-brand-yellow" : "text-brand-cream/70"
                             } ${isPortion ? "pl-6" : ""}`}
                           >
@@ -330,14 +334,16 @@ export function CustomizeItemPanel({
           }}
           className="px-4 pt-3"
         >
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-col gap-2.5 xs:flex-row xs:items-center">
             <QuantityStepper
               value={quantity}
               onIncrement={() => setQuantity((value) => Math.min(20, value + 1))}
               onDecrement={() => setQuantity((value) => Math.max(1, value - 1))}
             />
-            <button type="button" onClick={addToCart} className="btn-glow min-h-12 min-w-0 flex-1 px-3 py-3 text-sm">
-              <span className="block truncate">Aage badho · {formatINR(lineTotal)}</span>
+            <button type="button" onClick={addToCart} className="btn-glow min-h-12 min-w-0 w-full flex-1 px-3 py-3 text-sm xs:w-auto">
+              <span className="block whitespace-normal text-center leading-snug">
+                Add to Cart · {formatINR(lineTotal)}
+              </span>
             </button>
           </div>
         </div>

@@ -146,32 +146,34 @@ export default function OrderHomePage() {
   return (
     <div className="page-bottom">
       <div className="border-b border-white/10 bg-charcoal/70">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 page-pad py-4">
-          <div>
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 page-pad py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <p className="text-xs uppercase tracking-[0.22em] text-brand-gold">Hi {firstName}</p>
-            <p className="font-display text-xl font-semibold leading-tight sm:text-xl">Wokora Foods</p>
+            <p className="font-display text-xl font-semibold leading-tight">Wokora Foods</p>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="flex w-full rounded-full border border-white/15 bg-black/30 p-1 text-sm sm:w-auto">
+          <div className="flex w-full min-w-0 flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="grid w-full grid-cols-2 gap-1 rounded-full border border-white/15 bg-black/30 p-1 text-sm sm:flex sm:w-auto">
               <button
                 type="button"
                 onClick={() => setOrderType("dine_in")}
-                className={`flex-1 rounded-full px-4 py-1.5 sm:flex-none ${orderType === "dine_in" ? "bg-brand-yellow text-white" : "text-brand-cream/65"}`}
+                className={`min-h-10 min-w-0 rounded-full px-3 py-1.5 text-center ${orderType === "dine_in" ? "bg-brand-yellow text-black" : "text-brand-cream/65"}`}
               >
                 Dine-in
               </button>
               <button
                 type="button"
                 onClick={() => setOrderType("takeaway")}
-                className={`flex-1 rounded-full px-4 py-1.5 sm:flex-none ${orderType === "takeaway" ? "bg-brand-yellow text-white" : "text-brand-cream/65"}`}
+                className={`min-h-10 min-w-0 rounded-full px-3 py-1.5 text-center ${orderType === "takeaway" ? "bg-brand-yellow text-black" : "text-brand-cream/65"}`}
               >
                 Takeaway
               </button>
             </div>
-            <DietIcons value={diet} onChange={saveDiet} />
-            <button type="button" onClick={() => setGateOpen(true)} className="text-xs text-brand-cream/50 hover:text-brand-gold">
-              Change
-            </button>
+            <div className="flex items-center justify-between gap-3 sm:justify-start">
+              <DietIcons value={diet} onChange={saveDiet} />
+              <button type="button" onClick={() => setGateOpen(true)} className="text-xs text-brand-cream/50 hover:text-brand-gold">
+                Change
+              </button>
+            </div>
           </div>
         </div>
       </div>

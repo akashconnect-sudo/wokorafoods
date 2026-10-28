@@ -122,16 +122,16 @@ export default function CartPage() {
   };
 
   if (status === "loading") {
-    return <div className="px-4 py-20 text-center text-brand-cream/60">Loading cart...</div>;
+    return <div className="page-bottom page-pad py-20 text-center text-brand-cream/60">Loading cart...</div>;
   }
 
   if (isAdmin) {
-    return <div className="px-4 py-20 text-center text-brand-cream/60">Opening kitchen...</div>;
+    return <div className="page-bottom page-pad py-20 text-center text-brand-cream/60">Opening kitchen...</div>;
   }
 
   if (status === "unauthenticated") {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-20 text-center">
+      <div className="page-bottom mx-auto max-w-3xl page-pad py-20 text-center">
         <h1 className="font-display text-3xl font-bold">Login to use your cart</h1>
         <p className="mt-3 text-sm text-brand-cream/60">
           Add dishes, extras, and totals after you sign in. Kitchen login opens the orders board instead.
@@ -145,9 +145,9 @@ export default function CartPage() {
 
   if (items.length === 0 && !cashOrder) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-20 text-center">
+      <div className="page-bottom mx-auto max-w-3xl page-pad py-20 text-center">
         <h1 className="font-display text-3xl font-bold">Your tray is empty</h1>
-          <Link href="/menu" className="btn-glow mt-6 inline-block px-6 py-3">
+        <Link href="/menu" className="btn-glow mt-6 inline-block px-6 py-3">
           Browse menu
         </Link>
       </div>
@@ -181,31 +181,31 @@ export default function CartPage() {
   }
 
   return (
-    <div className="page-bottom mx-auto grid max-w-6xl gap-6 page-pad py-6 sm:py-10 md:grid-cols-[1.3fr_0.9fr] md:gap-6 lg:grid-cols-[1.4fr_0.8fr] lg:gap-8">
-      <section>
-        <h1 className="heading-underline font-display text-3xl font-bold">Cart</h1>
-        <div className="mt-8 space-y-4">
+    <div className="page-bottom mx-auto grid w-full min-w-0 max-w-6xl gap-5 page-pad py-5 sm:gap-6 sm:py-10 md:grid-cols-[minmax(0,1.3fr)_minmax(0,0.9fr)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.8fr)] lg:gap-8">
+      <section className="min-w-0">
+        <h1 className="heading-underline font-display text-2xl font-bold sm:text-3xl">Cart</h1>
+        <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
           {items.map((item) => (
-            <article key={item.id} className="card-surface flex gap-3 p-3 sm:gap-4">
+            <article key={item.id} className="card-surface flex min-w-0 gap-3 p-3 sm:gap-4 sm:p-4">
               <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl sm:h-20 sm:w-20">
                 <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                 <div className="min-w-0">
-                  <h2 className="truncate font-display font-semibold leading-tight">{item.name}</h2>
+                  <h2 className="break-words font-display font-semibold leading-tight">{item.name}</h2>
                   {item.customization ? (
                     <p className="mt-0.5 line-clamp-2 break-words text-xs text-brand-cream/50">{item.customization}</p>
                   ) : null}
                   <p className="text-sm text-brand-gold">{formatINR(item.price)}</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <QuantityStepper
                     compact
                     value={item.quantity}
                     onIncrement={() => increment(item.id)}
                     onDecrement={() => decrement(item.id)}
                   />
-                  <button onClick={() => removeItem(item.id)} className="text-xs text-brand-yellow">
+                  <button type="button" onClick={() => removeItem(item.id)} className="text-xs text-brand-yellow">
                     Remove
                   </button>
                 </div>
@@ -215,20 +215,24 @@ export default function CartPage() {
         </div>
       </section>
 
-      <aside className="card-surface h-fit p-6">
-        <h2 className="font-display text-xl font-semibold">Order summary</h2>
-        <div className="mt-4 flex rounded-full bg-white/5 p-1">
+      <aside className="card-surface h-fit w-full min-w-0 max-w-full overflow-hidden p-4 sm:p-5 md:p-6">
+        <h2 className="font-display text-lg font-semibold sm:text-xl">Order summary</h2>
+
+        <div className="mt-4 grid grid-cols-2 gap-1.5 rounded-2xl bg-white/5 p-1.5">
           {(["dine_in", "takeaway"] as const).map((type) => (
             <button
               key={type}
               type="button"
               onClick={() => setOrderType(type)}
-              className={`flex-1 rounded-full py-2 text-sm ${orderType === type ? "bg-brand-yellow" : ""}`}
+              className={`min-h-11 min-w-0 rounded-xl px-2 py-2.5 text-center text-xs font-semibold leading-tight xs:text-sm ${
+                orderType === type ? "bg-brand-yellow text-black" : "text-brand-cream"
+              }`}
             >
               {type === "dine_in" ? "Dine-in" : "Takeaway"}
             </button>
           ))}
         </div>
+
         {orderType === "dine_in" ? (
           <label className="mt-4 block text-sm">
             Table
@@ -247,14 +251,15 @@ export default function CartPage() {
                 );
               })}
             </select>
-            <span className="mt-2 block text-xs text-brand-cream/55">
-              Available tables are free. Kitchen can still re-assign after you order.
+            <span className="mt-2 block text-xs leading-relaxed text-brand-cream/55">
+              Free tables show as Available. Kitchen can re-assign after you order.
             </span>
           </label>
         ) : null}
+
         <div className="mt-4">
           <p className="text-sm">Payment</p>
-          <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+          <div className="mt-2 grid grid-cols-2 gap-2">
             {([
               ["upi", "UPI"],
               ["cash", "Cash"],
@@ -263,36 +268,59 @@ export default function CartPage() {
                 key={value}
                 type="button"
                 onClick={() => setPaymentMethod(value)}
-                className={`min-h-11 rounded-full px-1 py-2 ${paymentMethod === value ? "bg-brand-yellow" : "border border-white/10"}`}
+                className={`min-h-11 min-w-0 rounded-full px-3 py-2.5 text-center text-sm font-semibold ${
+                  paymentMethod === value ? "bg-brand-yellow text-black" : "border border-white/10 text-brand-cream"
+                }`}
               >
                 {label}
               </button>
             ))}
           </div>
         </div>
+
         <textarea
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
           placeholder="Notes for the kitchen"
-          className="mt-4 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-brand-yellow"
+          rows={3}
+          className="mt-4 w-full max-w-full resize-y rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-sm outline-none focus:border-brand-yellow sm:px-4"
         />
+
         <dl className="mt-5 space-y-2 text-sm">
-          <div className="flex justify-between"><dt>Subtotal</dt><dd>{formatINR(subtotal)}</dd></div>
-          <div className="flex justify-between text-brand-cream/60"><dt>GST (5%)</dt><dd>{formatINR(tax)}</dd></div>
-          <div className="flex justify-between font-display text-lg"><dt>Total</dt><dd className="text-brand-gold">{formatINR(total)}</dd></div>
+          <div className="flex items-baseline justify-between gap-3">
+            <dt className="shrink-0">Subtotal</dt>
+            <dd className="min-w-0 break-all text-right">{formatINR(subtotal)}</dd>
+          </div>
+          <div className="flex items-baseline justify-between gap-3 text-brand-cream/60">
+            <dt className="shrink-0">GST (5%)</dt>
+            <dd className="min-w-0 break-all text-right">{formatINR(tax)}</dd>
+          </div>
+          <div className="flex items-baseline justify-between gap-3 font-display text-base sm:text-lg">
+            <dt className="shrink-0">Total</dt>
+            <dd className="min-w-0 break-all text-right text-brand-gold">{formatINR(total)}</dd>
+          </div>
         </dl>
-        {error && <p className="mt-3 text-sm text-brand-yellow">{error}</p>}
-        <button onClick={placeOrder} disabled={loading} className="btn-glow mt-5 w-full py-3">
-          {status !== "authenticated" || !canUseCart
-            ? "Sign in to place your order"
-            : loading
-              ? "Placing order..."
-              : paymentMethod === "cash"
-                ? "Place order · Pay at counter"
-                : "Proceed to payment"}
+
+        {error ? <p className="mt-3 break-words text-sm text-brand-yellow">{error}</p> : null}
+
+        <button
+          type="button"
+          onClick={placeOrder}
+          disabled={loading}
+          className="btn-glow mt-5 w-full max-w-full px-3 py-3 text-sm sm:text-base"
+        >
+          <span className="block whitespace-normal text-center leading-snug">
+            {status !== "authenticated" || !canUseCart
+              ? "Sign in to place your order"
+              : loading
+                ? "Placing order..."
+                : paymentMethod === "cash"
+                  ? "Place order · Pay at counter"
+                  : "Proceed to payment"}
+          </span>
         </button>
-        <p className="mt-3 text-xs text-brand-cream/50">
-          Placing an order prints a receipt at the cafe counter for this table.
+        <p className="mt-3 break-words text-xs leading-relaxed text-brand-cream/50">
+          Your order prints a receipt at the cafe counter.
         </p>
       </aside>
     </div>
