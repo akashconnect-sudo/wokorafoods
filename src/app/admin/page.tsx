@@ -190,7 +190,9 @@ export default function AdminOrdersPage() {
                       {item.priceAtOrder ? <span>{formatINR(item.priceAtOrder * item.quantity)}</span> : null}
                     </div>
                     {item.customization ? (
-                      <p className="mt-0.5 text-xs text-brand-gold/80">{item.customization}</p>
+                      <p className="mt-0.5 break-words text-xs font-medium text-brand-yellow">
+                        ★ {item.customization}
+                      </p>
                     ) : null}
                   </li>
                 ))}

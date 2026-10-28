@@ -119,7 +119,10 @@ export function buildReceiptHtml(order: PrintableOrder) {
   const when = new Date(order.createdAt).toLocaleString("en-IN");
   const rows = order.items
     .map((item) => {
-      const label = item.customization ? `${item.name}<br/><small>${item.customization}</small>` : item.name;
+      const note = (item.customization || "").trim();
+      const label = note
+        ? `${item.name}<br/><small style="color:#333">★ ${note}</small>`
+        : item.name;
       return `<tr><td>${label}</td><td>${item.quantity}</td><td>₹${item.price * item.quantity}</td></tr>`;
     })
     .join("");

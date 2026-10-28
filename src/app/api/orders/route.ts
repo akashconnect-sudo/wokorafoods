@@ -145,6 +145,7 @@ export async function POST(request: Request) {
           menuItemId: row.menuItem.id,
           quantity: row.quantity,
           priceAtOrder: row.unitPrice,
+          customization: row.customization || "",
         })),
       },
     },
@@ -154,9 +155,18 @@ export async function POST(request: Request) {
     },
   });
 
+  // Keep a second write in case create omitted notes on older DBs.
   await saveOrderItemCustomizations(
     order.items,
-    priced.map((row) => row.customization || "")
+    order.items.map((item) => {
+      const match = priced.find(
+        (row) =>
+          row.menuItem.id === item.menuItemId &&
+          row.quantity === item.quantity &&
+          Math.abs(row.unitPrice - item.priceAtOrder) < 0.01
+      );
+      return match?.customization || item.customization || "";
+    })
   );
   await recordPayment({
     storeId,

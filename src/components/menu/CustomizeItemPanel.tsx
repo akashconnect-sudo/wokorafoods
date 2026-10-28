@@ -64,7 +64,7 @@ export function CustomizeItemPanel({
   item: CustomizableItem;
   onClose: () => void;
 }) {
-  const groups = item.optionGroups ?? EMPTY_GROUPS;
+  const groups = item.optionGroups?.length ? item.optionGroups : EMPTY_GROUPS;
   const orderedGroups = useMemo(() => {
     const size = groups.filter((group) => group.id === "size");
     const rest = groups.filter((group) => group.id !== "size");
@@ -82,18 +82,21 @@ export function CustomizeItemPanel({
 
   useEffect(() => {
     setQuantity(1);
-    setSelections(defaultSelections(groups));
-  }, [item.id, groups]);
+    setSelections(defaultSelections(item.optionGroups?.length ? item.optionGroups : EMPTY_GROUPS));
+  }, [item.id, item.optionGroups]);
 
   useEffect(() => {
-    const previous = document.body.style.overflow;
+    const previousOverflow = document.body.style.overflow;
+    const previousTouch = document.body.style.touchAction;
     document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = previous;
+      document.body.style.overflow = previousOverflow;
+      document.body.style.touchAction = previousTouch;
       window.removeEventListener("keydown", onKey);
     };
   }, [onClose]);
@@ -154,32 +157,63 @@ export function CustomizeItemPanel({
     onClose();
   };
 
-  if (!mounted) return null;
+  if (!mounted || typeof document === "undefined") return null;
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-end justify-center bg-black/80 p-0 sm:items-center sm:p-4 md:p-6"
-      onClick={onClose}
       role="presentation"
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        zIndex: 2147483000,
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+        padding: 0,
+        backgroundColor: "rgba(0,0,0,0.82)",
+      }}
+      className="sm:items-center sm:p-4"
     >
       <section
-        className="relative flex w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-white/10 border-b-0 bg-charcoal shadow-[0_-20px_60px_rgba(0,0,0,0.55)] max-sm:h-[min(90dvh,calc(100svh-0.25rem))] sm:max-h-[min(90dvh,calc(100svh-2rem))] sm:rounded-3xl sm:border"
-        onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label={`Customize ${item.name}`}
+        onClick={(event) => event.stopPropagation()}
+        style={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          maxWidth: "32rem",
+          height: "min(92dvh, 100svh)",
+          maxHeight: "min(92dvh, 100svh)",
+          overflow: "hidden",
+          backgroundColor: "#141414",
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 -20px 60px rgba(0,0,0,0.55)",
+        }}
+        className="sm:max-h-[min(88vh,40rem)] sm:rounded-3xl"
       >
-        <header className="flex shrink-0 items-start gap-3 border-b border-white/10 px-4 py-3.5 sm:px-5 sm:py-4">
-          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl sm:h-16 sm:w-16">
+        <header
+          style={{ flexShrink: 0 }}
+          className="flex items-start gap-3 border-b border-white/10 px-4 py-3.5"
+        >
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl">
             <Image src={item.imageUrl} alt={item.name} fill unoptimized className="object-cover" sizes="64px" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-start gap-2">
               <DietMark isVeg={item.isVeg} />
               <div className="min-w-0">
-                <h2 className="font-display text-base font-semibold leading-tight sm:text-lg">{item.name}</h2>
+                <h2 className="font-display text-base font-semibold leading-tight">{item.name}</h2>
                 {portions ? (
-                  <p className="mt-1 break-words text-xs text-brand-yellow sm:text-sm">
+                  <p className="mt-1 break-words text-xs text-brand-yellow">
                     Half {formatINR(portions.half)} · Full {formatINR(portions.full)}
                   </p>
                 ) : (
@@ -191,7 +225,7 @@ export function CustomizeItemPanel({
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-full border border-white/10 p-2 text-brand-cream/70 hover:text-white"
+            className="shrink-0 rounded-full border border-white/10 p-2 text-brand-cream/70"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -199,32 +233,34 @@ export function CustomizeItemPanel({
         </header>
 
         <div
-          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 touch-pan-y sm:px-5 sm:py-5"
-          style={{ WebkitOverflowScrolling: "touch" }}
+          style={{
+            flex: "1 1 auto",
+            minHeight: 0,
+            overflowY: "auto",
+            WebkitOverflowScrolling: "touch",
+            touchAction: "pan-y",
+          }}
+          className="overscroll-contain px-4 py-4"
         >
-          <div className="space-y-5 sm:space-y-6">
-            {orderedGroups.length === 0 && (
-              <p className="text-sm text-brand-cream/60">No extras on this plate. Pick a quantity and continue.</p>
-            )}
+          <div className="space-y-5 pb-4">
+            {orderedGroups.length === 0 ? (
+              <p className="text-sm text-brand-cream/60">No extras on this plate. Set quantity and continue.</p>
+            ) : null}
             {orderedGroups.map((group) => {
               const isPortion = group.id === "size" && Boolean(portions);
               return (
                 <div key={group.id}>
-                  <p className="font-display text-sm font-semibold sm:text-base">
+                  <p className="font-display text-sm font-semibold">
                     {isPortion ? "Half or Full" : group.label}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-brand-cream/45 sm:text-xs">
+                  <p className="mt-0.5 text-[11px] text-brand-cream/45">
                     {isPortion
-                      ? "Choose one to continue"
+                      ? "Choose one, then continue below"
                       : group.type === "single"
-                        ? "Choose one — payment uses this price + GST"
+                        ? "Choose one"
                         : "Choose any"}
                   </p>
-                  <div
-                    className={`mt-3 ${
-                      isPortion ? "grid grid-cols-2 gap-2.5 sm:gap-3" : "grid grid-cols-1 gap-2"
-                    }`}
-                  >
+                  <div className={`mt-3 ${isPortion ? "grid grid-cols-2 gap-2.5" : "grid grid-cols-1 gap-2"}`}>
                     {group.options.map((option) => {
                       const selected = (selections[group.id] || []).includes(option.id);
                       const priceText = isPortion
@@ -242,12 +278,12 @@ export function CustomizeItemPanel({
                               ? pickSingle(group.id, option.id)
                               : toggleMultiple(group.id, option.id)
                           }
-                          className={`flex min-h-[3.5rem] w-full items-center gap-2.5 rounded-2xl border px-3 py-3 text-left transition sm:min-h-14 ${
+                          className={`flex min-h-14 w-full items-center gap-2.5 rounded-2xl border px-3 py-3 text-left ${
                             isPortion ? "flex-col items-start justify-center gap-1" : "justify-between"
                           } ${
                             selected
-                              ? "border-brand-yellow bg-brand-yellow/15 text-brand-yellow shadow-[0_0_18px_rgba(255,200,0,0.22)]"
-                              : "border-white/10 bg-white/5 text-brand-cream hover:border-white/25"
+                              ? "border-brand-yellow bg-brand-yellow/15 text-brand-yellow"
+                              : "border-white/10 bg-white/5 text-brand-cream"
                           }`}
                         >
                           <span className="flex min-w-0 items-center gap-2.5">
@@ -269,7 +305,7 @@ export function CustomizeItemPanel({
                             </span>
                           </span>
                           <span
-                            className={`font-display text-sm font-semibold sm:text-base ${
+                            className={`font-display text-sm font-semibold ${
                               selected ? "text-brand-yellow" : "text-brand-cream/70"
                             } ${isPortion ? "pl-6" : ""}`}
                           >
@@ -285,21 +321,23 @@ export function CustomizeItemPanel({
           </div>
         </div>
 
-        <div className="shrink-0 border-t border-white/10 bg-ink px-4 pt-3 pb-[max(0.85rem,env(safe-area-inset-bottom,0px))] sm:px-5 sm:pt-3.5 sm:pb-4">
-          <div className="flex items-center gap-2.5 sm:gap-3">
+        <div
+          style={{
+            flexShrink: 0,
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+            backgroundColor: "#0B0B0B",
+            paddingBottom: "max(0.85rem, env(safe-area-inset-bottom, 0px))",
+          }}
+          className="px-4 pt-3"
+        >
+          <div className="flex items-center gap-2.5">
             <QuantityStepper
               value={quantity}
               onIncrement={() => setQuantity((value) => Math.min(20, value + 1))}
               onDecrement={() => setQuantity((value) => Math.max(1, value - 1))}
             />
-            <button
-              type="button"
-              onClick={addToCart}
-              className="btn-glow min-h-12 min-w-0 flex-1 px-3 py-3 text-sm sm:min-h-[3.25rem] sm:px-4 sm:text-base"
-            >
-              <span className="block truncate">
-                {hasPortion ? "Aage badho — Cart" : "Add to Cart"} · {formatINR(lineTotal)}
-              </span>
+            <button type="button" onClick={addToCart} className="btn-glow min-h-12 min-w-0 flex-1 px-3 py-3 text-sm">
+              <span className="block truncate">Aage badho · {formatINR(lineTotal)}</span>
             </button>
           </div>
         </div>

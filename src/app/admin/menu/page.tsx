@@ -26,7 +26,15 @@ import {
 } from "@/components/admin/kitchenMenuShared";
 
 function itemOptionGroups(item: KitchenItem): OptionGroup[] {
-  const groups = item.editableOptionGroups || item.optionGroups || [];
+  const raw = item.editableOptionGroups || item.optionGroups || [];
+  const groups =
+    raw.length > 0
+      ? raw
+      : defaultOptionGroupsFor(item.category.slug, item.isVeg, {
+          price: item.price,
+          halfPrice: item.halfPrice,
+          fullPrice: item.fullPrice,
+        });
   return groups.map((group) => ({
     ...group,
     options: group.options.map((option) => ({ ...option })),
@@ -47,6 +55,8 @@ function AdminMenuInner() {
   const [showAdd, setShowAdd] = useState(false);
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [showEditCategory, setShowEditCategory] = useState(false);
+  const [optionsItem, setOptionsItem] = useState<KitchenItem | null>(null);
+  const [optionsDraft, setOptionsDraft] = useState<OptionGroup[]>([]);
   const [categoryForm, setCategoryForm] = useState({ name: "", iconUrl: "" });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -345,8 +355,8 @@ function AdminMenuInner() {
               </span>
             </span>
           </div>
-          <div className="grid w-full grid-cols-3 gap-2 text-sm sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
-            {isDraft ? <span className="col-span-3 text-xs text-brand-yellow sm:col-auto">Draft</span> : null}
+          <div className="grid w-full grid-cols-2 gap-2 text-sm sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
+            {isDraft ? <span className="col-span-2 text-xs text-brand-yellow sm:col-auto">Draft</span> : null}
             <button
               type="button"
               onClick={async () => {
@@ -385,6 +395,16 @@ function AdminMenuInner() {
             </button>
             <button
               type="button"
+              onClick={() => {
+                setOptionsItem(item);
+                setOptionsDraft(itemOptionGroups(item));
+              }}
+              className="min-h-11 rounded-full border border-brand-yellow/50 px-2 py-2 text-center text-xs font-semibold text-brand-yellow sm:px-3 sm:text-sm"
+            >
+              Options
+            </button>
+            <button
+              type="button"
               onClick={async () => {
                 if (!window.confirm(`Delete ${item.name}?`)) return;
                 try {
@@ -404,6 +424,67 @@ function AdminMenuInner() {
       )}
     </article>
   );
+
+  const optionsPopup = optionsItem ? (
+    <KitchenPopup
+      title={`Options · ${optionsItem.name}`}
+      onClose={() => {
+        setOptionsItem(null);
+        setOptionsDraft([]);
+      }}
+    >
+      <p className="mb-3 text-sm text-brand-cream/60">
+        Edit Add extras, Spice level, Half/Full. Turn off <span className="text-brand-gold">Show</span> to hide from
+        customers.
+      </p>
+      <CustomizationEditor
+        groups={optionsDraft}
+        onChange={setOptionsDraft}
+        onReset={() =>
+          setOptionsDraft(
+            defaultOptionGroupsFor(optionsItem.category.slug, optionsItem.isVeg, {
+              price: optionsItem.price,
+              halfPrice: optionsItem.halfPrice,
+              fullPrice: optionsItem.fullPrice,
+            })
+          )
+        }
+      />
+      <div className="stack-actions mt-4">
+        <button
+          type="button"
+          disabled={saving}
+          onClick={async () => {
+            setSaving(true);
+            try {
+              await patchKitchenItem(optionsItem.id, { optionGroups: optionsDraft });
+              setMessage("Options saved. Customer menu updated.");
+              setOptionsItem(null);
+              setOptionsDraft([]);
+              await load();
+            } catch (error) {
+              saveMessage(error, "Could not save options");
+            } finally {
+              setSaving(false);
+            }
+          }}
+          className="btn-glow w-full px-5 py-2.5 sm:w-auto"
+        >
+          {saving ? "Saving..." : "Save options"}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setOptionsItem(null);
+            setOptionsDraft([]);
+          }}
+          className="min-h-11 text-sm text-brand-cream/60"
+        >
+          Cancel
+        </button>
+      </div>
+    </KitchenPopup>
+  ) : null;
 
   if (plate && items.length > 0 && !category && !dishes.length) {
     return (
@@ -639,6 +720,7 @@ function AdminMenuInner() {
             </form>
           </KitchenPopup>
         ) : null}
+        {optionsPopup}
       </div>
     );
   }
@@ -765,6 +847,7 @@ function AdminMenuInner() {
               : "No dishes match that search yet."}
         </p>
       )}
+      {optionsPopup}
     </div>
   );
 }
