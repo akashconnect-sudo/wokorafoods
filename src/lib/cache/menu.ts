@@ -40,9 +40,11 @@ export async function cacheDel(prefix: string) {
   const extras: string[] = [];
   for (const mode of modes) {
     for (const featured of ["true", "false"]) {
+      extras.push(`hf5:${mode}:::${featured}`);
       extras.push(`hf4:${mode}:::${featured}`);
       extras.push(`hf3:${mode}:::${featured}`);
       extras.push(`hf2:${mode}:::${featured}`);
+      extras.push(`hf5:${mode}::`);
       extras.push(`hf4:${mode}::`);
       extras.push(`hf3:${mode}::`);
       extras.push(`hf2:${mode}::`);

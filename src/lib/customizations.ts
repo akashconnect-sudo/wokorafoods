@@ -234,7 +234,48 @@ function applyPortionPrices(groups: OptionGroup[], category: string, portions?: 
 
   const nextPortion = portionGroup(fullDelta);
   if (!existingSize) return [nextPortion, ...groups];
-  return groups.map((group) => (group.id === "size" ? nextPortion : group));
+  // Preserve kitchen hide/label when only refreshing Half/Full price deltas.
+  return groups.map((group) =>
+    group.id === "size"
+      ? {
+          ...nextPortion,
+          label: group.label || nextPortion.label,
+          hidden: Boolean(group.hidden),
+        }
+      : group
+  );
+}
+
+/**
+ * Kitchen-saved option groups are the source of truth.
+ * Never re-add Half/Full if staff hid or removed that section.
+ * Only refresh Full price deltas when the size group is still enabled.
+ */
+function syncStoredPortionPrices(groups: OptionGroup[], portions?: PortionPrices | null): OptionGroup[] {
+  const existingSize = groups.find((group) => group.id === "size");
+  if (!existingSize || existingSize.hidden) return groups;
+
+  const hasHalfFull = existingSize.options.some(
+    (option) => option.id === "half" || option.id === "full"
+  );
+  if (!hasHalfFull) return groups;
+
+  const { half, full } = resolvePortionPrices(portions);
+  const fallbackDelta =
+    existingSize.options.find((option) => option.id === "full")?.priceDelta ?? 50;
+  const fullDelta = full != null && full > 0 ? Math.max(0, full - half) : fallbackDelta;
+
+  return groups.map((group) => {
+    if (group.id !== "size") return group;
+    return {
+      ...group,
+      options: group.options.map((option) => {
+        if (option.id === "full") return { ...option, priceDelta: fullDelta };
+        if (option.id === "half") return { ...option, priceDelta: 0 };
+        return option;
+      }),
+    };
+  });
 }
 
 function cloneGroups(groups: OptionGroup[]): OptionGroup[] {
@@ -331,7 +372,7 @@ export function optionGroupsFor(
   const stored = parseStoredCustomizations(storedJson);
   const base =
     stored != null
-      ? applyPortionPrices(cloneGroups(stored), category, portions)
+      ? syncStoredPortionPrices(cloneGroups(stored), portions)
       : defaultOptionGroupsFor(category, isVeg, portions);
   if (options?.includeHidden) return base;
   return base.filter((group) => !group.hidden && group.options.length > 0);
