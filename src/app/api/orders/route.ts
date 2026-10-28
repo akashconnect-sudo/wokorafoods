@@ -96,7 +96,12 @@ export async function POST(request: Request) {
       halfPrice: menuItem.halfPrice,
       fullPrice: menuItem.fullPrice,
     };
-    const groups = optionGroupsFor(menuItem.category.slug, menuItem.isVeg, portions);
+    const groups = optionGroupsFor(
+      menuItem.category.slug,
+      menuItem.isVeg,
+      portions,
+      menuItem.customizationsJson
+    );
     const selections = sanitizeSelections(groups, item.selections);
     const base = basePriceForItem(portions);
     const unitPrice = unitPriceFromSelections(base, groups, selections);

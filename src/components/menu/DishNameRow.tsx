@@ -12,6 +12,7 @@ export function DishNameRow({ item }: { item: FoodCardItem }) {
   const { ensureCart, canUseCart } = useCartAccess();
   const groups = item.optionGroups || [];
   const hasPortion = groups.some((group) => group.id === "size" && group.options.some((o) => o.id === "half"));
+  const needsCustomize = groups.length > 0;
   const lineId = defaultLineId(item);
   const cartItem = useCartStore((state) => state.items.find((row) => row.id === lineId));
   const portionQty = useCartStore((state) =>
@@ -38,7 +39,7 @@ export function DishNameRow({ item }: { item: FoodCardItem }) {
 
   const add = () => {
     if (!ensureCart()) return;
-    if (hasPortion) {
+    if (needsCustomize) {
       setOpen(true);
       return;
     }
@@ -48,7 +49,7 @@ export function DishNameRow({ item }: { item: FoodCardItem }) {
   return (
     <>
       <div className="flex items-center gap-3 border-b border-white/10 py-3.5 last:border-b-0">
-        <button type="button" onClick={hasPortion ? openPanel : add} className="min-w-0 flex-1 text-left">
+        <button type="button" onClick={needsCustomize ? openPanel : add} className="min-w-0 flex-1 text-left">
           <span className="flex items-start gap-2">
             <span
               className={`mt-1 grid h-4 w-4 shrink-0 place-items-center rounded-[3px] border ${
@@ -74,14 +75,14 @@ export function DishNameRow({ item }: { item: FoodCardItem }) {
         </button>
         {item.isAvailable === false ? (
           <p className="text-xs text-brand-yellow">Sold out</p>
-        ) : canUseCart && cartItem && !hasPortion ? (
+        ) : canUseCart && cartItem && !needsCustomize ? (
           <QuantityStepper
             compact
             value={cartItem.quantity}
             onIncrement={() => increment(cartItem.id)}
             onDecrement={() => decrement(cartItem.id)}
           />
-        ) : canUseCart && hasPortion && portionQty > 0 ? (
+        ) : canUseCart && needsCustomize && portionQty > 0 ? (
           <button
             type="button"
             onClick={openPanel}

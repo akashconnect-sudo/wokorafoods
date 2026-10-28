@@ -8,7 +8,13 @@ export type OptionGroup = {
   id: string;
   label: string;
   type: "single" | "multiple";
+  /** When true, kitchen hid this group from customers. */
+  hidden?: boolean;
   options: CustomizeOption[];
+};
+
+export type StoredCustomizations = {
+  groups: OptionGroup[];
 };
 
 export type CustomizeSelections = Record<string, string[]>;
@@ -231,16 +237,104 @@ function applyPortionPrices(groups: OptionGroup[], category: string, portions?: 
   return groups.map((group) => (group.id === "size" ? nextPortion : group));
 }
 
-export function optionGroupsFor(
+function cloneGroups(groups: OptionGroup[]): OptionGroup[] {
+  return groups.map((group) => ({
+    ...group,
+    options: group.options.map((option) => ({ ...option })),
+  }));
+}
+
+export function defaultOptionGroupsFor(
   category: string,
   isVeg: boolean,
   portions?: PortionPrices | null
 ): OptionGroup[] {
-  const groups = GROUPS[category] || [];
+  const groups = cloneGroups(GROUPS[category] || []);
   if (category === "coffee") return groups;
   const withPortions = applyPortionPrices(groups, category, portions);
   if (category === "chicken-lollipop") return withPortions;
   return withChickenExtra(withPortions, isVeg);
+}
+
+function sanitizeGroup(raw: unknown): OptionGroup | null {
+  if (!raw || typeof raw !== "object") return null;
+  const group = raw as Record<string, unknown>;
+  const id = String(group.id || "").trim();
+  const label = String(group.label || "").trim();
+  const type = group.type === "multiple" ? "multiple" : "single";
+  if (!id || !label) return null;
+  const optionsRaw = Array.isArray(group.options) ? group.options : [];
+  const options: CustomizeOption[] = [];
+  for (const row of optionsRaw) {
+    if (!row || typeof row !== "object") continue;
+    const option = row as Record<string, unknown>;
+    const optionId = String(option.id || "").trim();
+    const optionLabel = String(option.label || "").trim();
+    if (!optionId || !optionLabel) continue;
+    const priceDelta = Number(option.priceDelta);
+    options.push({
+      id: optionId,
+      label: optionLabel,
+      priceDelta: Number.isFinite(priceDelta) ? priceDelta : 0,
+    });
+  }
+  return {
+    id,
+    label,
+    type,
+    hidden: Boolean(group.hidden),
+    options,
+  };
+}
+
+export function parseStoredCustomizations(json: string | null | undefined): OptionGroup[] | null {
+  if (!json || !json.trim()) return null;
+  try {
+    const parsed = JSON.parse(json) as unknown;
+    const list = Array.isArray(parsed)
+      ? parsed
+      : parsed && typeof parsed === "object" && Array.isArray((parsed as StoredCustomizations).groups)
+        ? (parsed as StoredCustomizations).groups
+        : null;
+    if (!list) return null;
+    const groups = list.map(sanitizeGroup).filter((group): group is OptionGroup => Boolean(group));
+    return groups.length ? groups : [];
+  } catch {
+    return null;
+  }
+}
+
+export function serializeCustomizations(groups: OptionGroup[]): string {
+  const payload: StoredCustomizations = {
+    groups: groups.map((group) => ({
+      id: group.id,
+      label: group.label,
+      type: group.type,
+      hidden: Boolean(group.hidden),
+      options: group.options.map((option) => ({
+        id: option.id,
+        label: option.label,
+        priceDelta: Number(option.priceDelta) || 0,
+      })),
+    })),
+  };
+  return JSON.stringify(payload);
+}
+
+export function optionGroupsFor(
+  category: string,
+  isVeg: boolean,
+  portions?: PortionPrices | null,
+  storedJson?: string | null,
+  options?: { includeHidden?: boolean }
+): OptionGroup[] {
+  const stored = parseStoredCustomizations(storedJson);
+  const base =
+    stored != null
+      ? applyPortionPrices(cloneGroups(stored), category, portions)
+      : defaultOptionGroupsFor(category, isVeg, portions);
+  if (options?.includeHidden) return base;
+  return base.filter((group) => !group.hidden && group.options.length > 0);
 }
 
 export function basePriceForItem(portions?: PortionPrices | null) {

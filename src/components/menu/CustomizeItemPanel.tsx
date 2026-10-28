@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
@@ -64,10 +65,20 @@ export function CustomizeItemPanel({
   onClose: () => void;
 }) {
   const groups = item.optionGroups ?? EMPTY_GROUPS;
+  const orderedGroups = useMemo(() => {
+    const size = groups.filter((group) => group.id === "size");
+    const rest = groups.filter((group) => group.id !== "size");
+    return [...size, ...rest];
+  }, [groups]);
   const addItem = useCartStore((state) => state.addItem);
   const { ensureCart } = useCartAccess();
   const [quantity, setQuantity] = useState(1);
   const [selections, setSelections] = useState<CustomizeSelections>(() => defaultSelections(groups));
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setQuantity(1);
@@ -102,6 +113,9 @@ export function CustomizeItemPanel({
     [item.price, item.halfPrice, item.fullPrice, groups]
   );
 
+  const hasPortion = Boolean(portions);
+  const portionSelected = Boolean(selections.size?.[0]);
+
   const pickSingle = (groupId: string, optionId: string) => {
     setSelections((current) => ({ ...current, [groupId]: [optionId] }));
   };
@@ -116,6 +130,10 @@ export function CustomizeItemPanel({
 
   const addToCart = () => {
     if (!ensureCart()) return;
+    if (hasPortion && !portionSelected) {
+      toast("Pehle Half ya Full choose karo");
+      return;
+    }
     const configKey = configKeyFromSelections(selections);
     const customization = summaryFromSelections(groups, selections);
     addItem(
@@ -136,21 +154,32 @@ export function CustomizeItemPanel({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center sm:p-4 lg:items-stretch lg:justify-end lg:p-0">
-      <button type="button" aria-label="Close customization" className="absolute inset-0 bg-black/65" onClick={onClose} />
-      <section className="relative flex max-h-[min(92dvh,42rem)] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-white/10 bg-charcoal shadow-[0_-20px_60px_rgba(0,0,0,0.45)] sm:max-h-[90vh] sm:rounded-3xl lg:h-full lg:max-h-none lg:w-[min(28rem,100vw)] lg:max-w-none lg:rounded-none lg:rounded-l-3xl lg:border-l">
-        <header className="flex items-start gap-3 border-b border-white/10 px-3 py-3 xs:px-4 xs:py-4">
-          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl xs:h-16 xs:w-16">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[200] flex items-end justify-center bg-black/80 p-0 sm:items-center sm:p-4 md:p-6"
+      onClick={onClose}
+      role="presentation"
+    >
+      <section
+        className="relative flex w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-white/10 border-b-0 bg-charcoal shadow-[0_-20px_60px_rgba(0,0,0,0.55)] max-sm:h-[min(90dvh,calc(100svh-0.25rem))] sm:max-h-[min(90dvh,calc(100svh-2rem))] sm:rounded-3xl sm:border"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Customize ${item.name}`}
+      >
+        <header className="flex shrink-0 items-start gap-3 border-b border-white/10 px-4 py-3.5 sm:px-5 sm:py-4">
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl sm:h-16 sm:w-16">
             <Image src={item.imageUrl} alt={item.name} fill unoptimized className="object-cover" sizes="64px" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-start gap-2">
               <DietMark isVeg={item.isVeg} />
               <div className="min-w-0">
-                <h2 className="font-display text-base font-semibold leading-tight xs:text-lg">{item.name}</h2>
+                <h2 className="font-display text-base font-semibold leading-tight sm:text-lg">{item.name}</h2>
                 {portions ? (
-                  <p className="mt-1 break-words text-xs text-brand-yellow xs:text-sm">
+                  <p className="mt-1 break-words text-xs text-brand-yellow sm:text-sm">
                     Half {formatINR(portions.half)} · Full {formatINR(portions.full)}
                   </p>
                 ) : (
@@ -159,7 +188,6 @@ export function CustomizeItemPanel({
               </div>
             </div>
           </div>
-          <p className="hidden shrink-0 font-display text-lg text-brand-yellow md:block">{formatINR(lineTotal)}</p>
           <button
             type="button"
             onClick={onClose}
@@ -170,97 +198,113 @@ export function CustomizeItemPanel({
           </button>
         </header>
 
-        <div className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-3 py-4 xs:space-y-6 xs:px-4 xs:py-5">
-          {groups.length === 0 && (
-            <p className="text-sm text-brand-cream/60">No extras on this plate. Pick a quantity and add it to the tray.</p>
-          )}
-          {groups.map((group) => {
-            const isPortion = group.id === "size" && Boolean(portions);
-            return (
-              <div key={group.id}>
-                <p className="font-display text-sm font-semibold xs:text-base">
-                  {isPortion ? "Half or Full" : group.label}
-                </p>
-                <p className="mt-0.5 text-[11px] text-brand-cream/45 xs:text-xs">
-                  {group.type === "single" ? "Choose one — payment uses this price + GST" : "Choose any"}
-                </p>
-                <div
-                  className={`mt-3 ${
-                    isPortion
-                      ? "grid grid-cols-2 gap-2 xs:gap-3"
-                      : "grid grid-cols-1 gap-2"
-                  }`}
-                >
-                  {group.options.map((option) => {
-                    const selected = (selections[group.id] || []).includes(option.id);
-                    const priceText = isPortion
-                      ? option.id === "full"
-                        ? formatINR(portions!.full)
-                        : formatINR(portions!.half)
-                      : optionPriceLabel(option.priceDelta, item.price, group.id);
-                    return (
-                      <button
-                        key={option.id}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() =>
-                          group.type === "single"
-                            ? pickSingle(group.id, option.id)
-                            : toggleMultiple(group.id, option.id)
-                        }
-                        className={`flex min-h-[3.25rem] w-full items-center gap-2 rounded-2xl border px-2.5 py-2.5 text-left transition xs:min-h-[3.5rem] xs:gap-3 xs:px-3 xs:py-3 ${
-                          isPortion ? "flex-col items-stretch justify-between sm:flex-row sm:items-center" : "justify-between"
-                        } ${
-                          selected
-                            ? "border-brand-yellow bg-brand-yellow/15 text-brand-yellow shadow-[0_0_18px_rgba(255,200,0,0.22)]"
-                            : "border-white/10 bg-white/5 text-brand-cream hover:border-white/25"
-                        }`}
-                      >
-                        <span className="flex min-w-0 items-center gap-2 xs:gap-3">
-                          <span
-                            className={`grid h-4 w-4 shrink-0 place-items-center border ${
-                              group.type === "single" ? "rounded-full" : "rounded-[3px]"
-                            } ${selected ? "border-brand-yellow" : "border-white/35"}`}
-                          >
-                            {selected ? (
-                              <span
-                                className={`bg-brand-yellow ${
-                                  group.type === "single" ? "h-2 w-2 rounded-full" : "h-2 w-2"
-                                }`}
-                              />
-                            ) : null}
-                          </span>
-                          <span className={`truncate text-sm font-semibold ${selected ? "text-brand-yellow" : ""}`}>
-                            {option.label}
-                          </span>
-                        </span>
-                        <span
-                          className={`shrink-0 font-display text-sm font-semibold xs:text-base ${
-                            selected ? "text-brand-yellow" : "text-brand-cream/70"
-                          } ${isPortion ? "pl-6 sm:pl-0" : ""}`}
+        <div
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 touch-pan-y sm:px-5 sm:py-5"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          <div className="space-y-5 sm:space-y-6">
+            {orderedGroups.length === 0 && (
+              <p className="text-sm text-brand-cream/60">No extras on this plate. Pick a quantity and continue.</p>
+            )}
+            {orderedGroups.map((group) => {
+              const isPortion = group.id === "size" && Boolean(portions);
+              return (
+                <div key={group.id}>
+                  <p className="font-display text-sm font-semibold sm:text-base">
+                    {isPortion ? "Half or Full" : group.label}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-brand-cream/45 sm:text-xs">
+                    {isPortion
+                      ? "Choose one to continue"
+                      : group.type === "single"
+                        ? "Choose one — payment uses this price + GST"
+                        : "Choose any"}
+                  </p>
+                  <div
+                    className={`mt-3 ${
+                      isPortion ? "grid grid-cols-2 gap-2.5 sm:gap-3" : "grid grid-cols-1 gap-2"
+                    }`}
+                  >
+                    {group.options.map((option) => {
+                      const selected = (selections[group.id] || []).includes(option.id);
+                      const priceText = isPortion
+                        ? option.id === "full"
+                          ? formatINR(portions!.full)
+                          : formatINR(portions!.half)
+                        : optionPriceLabel(option.priceDelta, item.price, group.id);
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() =>
+                            group.type === "single"
+                              ? pickSingle(group.id, option.id)
+                              : toggleMultiple(group.id, option.id)
+                          }
+                          className={`flex min-h-[3.5rem] w-full items-center gap-2.5 rounded-2xl border px-3 py-3 text-left transition sm:min-h-14 ${
+                            isPortion ? "flex-col items-start justify-center gap-1" : "justify-between"
+                          } ${
+                            selected
+                              ? "border-brand-yellow bg-brand-yellow/15 text-brand-yellow shadow-[0_0_18px_rgba(255,200,0,0.22)]"
+                              : "border-white/10 bg-white/5 text-brand-cream hover:border-white/25"
+                          }`}
                         >
-                          {priceText}
-                        </span>
-                      </button>
-                    );
-                  })}
+                          <span className="flex min-w-0 items-center gap-2.5">
+                            <span
+                              className={`grid h-4 w-4 shrink-0 place-items-center border ${
+                                group.type === "single" ? "rounded-full" : "rounded-[3px]"
+                              } ${selected ? "border-brand-yellow" : "border-white/35"}`}
+                            >
+                              {selected ? (
+                                <span
+                                  className={`bg-brand-yellow ${
+                                    group.type === "single" ? "h-2 w-2 rounded-full" : "h-2 w-2"
+                                  }`}
+                                />
+                              ) : null}
+                            </span>
+                            <span className={`text-sm font-semibold ${selected ? "text-brand-yellow" : ""}`}>
+                              {option.label}
+                            </span>
+                          </span>
+                          <span
+                            className={`font-display text-sm font-semibold sm:text-base ${
+                              selected ? "text-brand-yellow" : "text-brand-cream/70"
+                            } ${isPortion ? "pl-6" : ""}`}
+                          >
+                            {priceText}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 border-t border-white/10 bg-ink/90 px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] xs:gap-3 xs:px-4">
-          <QuantityStepper
-            value={quantity}
-            onIncrement={() => setQuantity((value) => Math.min(20, value + 1))}
-            onDecrement={() => setQuantity((value) => Math.max(1, value - 1))}
-          />
-          <button type="button" onClick={addToCart} className="btn-glow min-w-0 flex-1 px-3 py-3 text-xs xs:text-sm sm:px-4">
-            <span className="truncate">Add to Cart — {formatINR(lineTotal)}</span>
-          </button>
+        <div className="shrink-0 border-t border-white/10 bg-ink px-4 pt-3 pb-[max(0.85rem,env(safe-area-inset-bottom,0px))] sm:px-5 sm:pt-3.5 sm:pb-4">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <QuantityStepper
+              value={quantity}
+              onIncrement={() => setQuantity((value) => Math.min(20, value + 1))}
+              onDecrement={() => setQuantity((value) => Math.max(1, value - 1))}
+            />
+            <button
+              type="button"
+              onClick={addToCart}
+              className="btn-glow min-h-12 min-w-0 flex-1 px-3 py-3 text-sm sm:min-h-[3.25rem] sm:px-4 sm:text-base"
+            >
+              <span className="block truncate">
+                {hasPortion ? "Aage badho — Cart" : "Add to Cart"} · {formatINR(lineTotal)}
+              </span>
+            </button>
+          </div>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,3 +1,5 @@
+import type { OptionGroup } from "@/lib/customizations";
+
 export type KitchenCategory = { id: string; name: string; slug: string; iconUrl?: string | null };
 
 export type KitchenItem = {
@@ -13,6 +15,9 @@ export type KitchenItem = {
   isFeatured: boolean;
   categoryId: string;
   category: KitchenCategory;
+  optionGroups?: OptionGroup[];
+  editableOptionGroups?: OptionGroup[];
+  customizationsJson?: string | null;
 };
 
 export const emptyVariation = {
@@ -23,6 +28,7 @@ export const emptyVariation = {
   fullPrice: "",
   imageUrl: "",
   isVeg: true,
+  optionGroups: [] as OptionGroup[],
 };
 
 export async function fetchKitchenMenu() {

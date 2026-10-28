@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   const storeId = session?.user.storeId || DEFAULT_STORE_ID;
   const showHidden = session?.user.role === "admin" && searchParams.get("all") === "true";
-  const cacheKey = menuCacheKey(storeId, `hf2:${showHidden ? "all" : "pub"}:${category || ""}:${q || ""}:${featured}`);
+  const cacheKey = menuCacheKey(storeId, `hf3:${showHidden ? "all" : "pub"}:${category || ""}:${q || ""}:${featured}`);
 
   if (!q) {
     const cached = await cacheGet<{ items: unknown; categories: unknown }>(cacheKey);
@@ -53,10 +53,20 @@ export async function GET(request: Request) {
         halfPrice: item.halfPrice,
         fullPrice: item.fullPrice,
       };
+      const editableOptionGroups = optionGroupsFor(
+        item.category.slug,
+        item.isVeg,
+        portions,
+        item.customizationsJson,
+        { includeHidden: true }
+      );
       return {
         ...item,
         price: basePriceForItem(portions),
-        optionGroups: optionGroupsFor(item.category.slug, item.isVeg, portions),
+        optionGroups: showHidden
+          ? editableOptionGroups
+          : optionGroupsFor(item.category.slug, item.isVeg, portions, item.customizationsJson),
+        editableOptionGroups: showHidden ? editableOptionGroups : undefined,
       };
     }),
     categories,

@@ -82,14 +82,15 @@ model MenuItem {
   category    Category    @relation(fields: [categoryId], references: [id])
   description String
   price       Float
-  halfPrice   Float?
-  fullPrice   Float?
-  imageUrl    String
-  isVeg       Boolean     @default(true)
-  isAvailable Boolean     @default(true)
-  isFeatured  Boolean     @default(false)
-  orderItems  OrderItem[]
-  cartLines   CartLine[]
+  halfPrice            Float?
+  fullPrice            Float?
+  imageUrl             String
+  customizationsJson   String?      @db.LongText
+  isVeg                Boolean      @default(true)
+  isAvailable          Boolean      @default(true)
+  isFeatured           Boolean      @default(false)
+  orderItems           OrderItem[]
+  cartLines            CartLine[]
 
   @@unique([storeId, slug])
   @@index([storeId])

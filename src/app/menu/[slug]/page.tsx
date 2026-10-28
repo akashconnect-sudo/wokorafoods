@@ -92,7 +92,7 @@ function CategoryMenuInner() {
       </div>
 
       <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_17.5rem] lg:grid-cols-[minmax(0,1fr)_20.5rem]">
-        <section className="card-surface overflow-hidden px-3 sm:px-4">
+        <section className="card-surface px-3 sm:px-4">
           {dishes.length === 0 ? (
             <p className="py-12 text-center text-sm text-brand-cream/55">
               {diet === "veg" ? "No veg dishes here." : diet === "nonveg" ? "No non-veg dishes here." : "Nothing in this plate yet."}

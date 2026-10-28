@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { cacheDel, menuCacheKey } from "@/lib/cache/menu";
 import { DEFAULT_STORE_ID } from "@/lib/store";
+import { serializeCustomizations, type OptionGroup } from "@/lib/customizations";
 import { serverErrorJson } from "@/lib/publicError";
 
 async function assertAdmin() {
@@ -35,6 +36,20 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         ? halfPrice
         : undefined;
 
+  let customizationsJson: string | null | undefined;
+  if (body.customizationsJson !== undefined) {
+    customizationsJson =
+      body.customizationsJson === null || body.customizationsJson === ""
+        ? null
+        : String(body.customizationsJson);
+  } else if (body.optionGroups !== undefined) {
+    if (body.optionGroups === null) {
+      customizationsJson = null;
+    } else if (Array.isArray(body.optionGroups)) {
+      customizationsJson = serializeCustomizations(body.optionGroups as OptionGroup[]);
+    }
+  }
+
   const item = await prisma.menuItem.update({
     where: { id: params.id },
     data: {
@@ -52,6 +67,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       ...(body.isAvailable !== undefined ? { isAvailable: Boolean(body.isAvailable) } : {}),
       ...(body.isFeatured !== undefined ? { isFeatured: Boolean(body.isFeatured) } : {}),
       ...(body.categoryId !== undefined ? { categoryId: body.categoryId } : {}),
+      ...(customizationsJson !== undefined ? { customizationsJson } : {}),
     },
     include: { category: true },
   });

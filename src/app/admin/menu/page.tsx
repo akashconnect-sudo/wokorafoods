@@ -8,9 +8,11 @@ import { ArrowLeft, Search } from "lucide-react";
 import { DietToggle, type DietPreference } from "@/components/menu/DietToggle";
 import { CategoryPlateGrid } from "@/components/menu/CategoryPlateGrid";
 import { KitchenPopup } from "@/components/admin/KitchenPopup";
+import { CustomizationEditor } from "@/components/admin/CustomizationEditor";
 import { formatINR } from "@/lib/constants";
 import { userFacingError } from "@/lib/publicError";
 import { buildCategoryPlates, filterMenuItems, parseDiet } from "@/lib/menuView";
+import { defaultOptionGroupsFor, type OptionGroup } from "@/lib/customizations";
 import {
   deleteKitchenCategory,
   deleteKitchenItem,
@@ -22,6 +24,14 @@ import {
   type KitchenCategory,
   type KitchenItem,
 } from "@/components/admin/kitchenMenuShared";
+
+function itemOptionGroups(item: KitchenItem): OptionGroup[] {
+  const groups = item.editableOptionGroups || item.optionGroups || [];
+  return groups.map((group) => ({
+    ...group,
+    options: group.options.map((option) => ({ ...option })),
+  }));
+}
 
 function AdminMenuInner() {
   const router = useRouter();
@@ -256,6 +266,24 @@ function AdminMenuInner() {
             className="min-h-24 rounded-2xl border border-white/10 bg-ink px-3 py-2 md:col-span-2"
             placeholder="Description"
           />
+          <CustomizationEditor
+            groups={draft.optionGroups || []}
+            onChange={(optionGroups) => setDraft({ ...draft, optionGroups })}
+            onReset={() =>
+              setDraft({
+                ...draft,
+                optionGroups: defaultOptionGroupsFor(
+                  item.category.slug,
+                  draft.isVeg,
+                  {
+                    price: Number(draft.halfPrice || draft.price) || item.price,
+                    halfPrice: Number(draft.halfPrice || draft.price) || item.halfPrice,
+                    fullPrice: draft.fullPrice === "" ? null : Number(draft.fullPrice),
+                  }
+                ),
+              })
+            }
+          />
           <div className="stack-actions md:col-span-2">
             <button
               type="button"
@@ -271,6 +299,7 @@ function AdminMenuInner() {
                     fullPrice: full,
                     imageUrl: draft.imageUrl,
                     isVeg: draft.isVeg,
+                    optionGroups: draft.optionGroups || [],
                   });
                   setEditing(null);
                   setMessage("Saved. Customer menu updated.");
@@ -347,6 +376,7 @@ function AdminMenuInner() {
                   fullPrice: item.fullPrice != null ? String(item.fullPrice) : "",
                   imageUrl: item.imageUrl,
                   isVeg: item.isVeg,
+                  optionGroups: itemOptionGroups(item),
                 });
               }}
               className="min-h-11 rounded-full border border-brand-gold/40 px-2 py-2 text-center text-xs text-brand-gold sm:px-3 sm:text-sm"
