@@ -220,10 +220,12 @@ export function resolvePortionPrices(portions?: PortionPrices | null) {
 
 function applyPortionPrices(groups: OptionGroup[], category: string, portions?: PortionPrices | null): OptionGroup[] {
   const { half, full } = resolvePortionPrices(portions);
-  const wantsPortion =
-    (full != null && full > 0) ||
-    PORTION_CATEGORIES.has(category) ||
-    groups.some((group) => group.options.some((option) => option.id === "half" || option.id === "full"));
+  // Never force Half/Full onto burgers/coffee/etc just because a fullPrice field exists.
+  // Only portion categories (or groups that already have half/full options) get portions.
+  const hasHalfFullOptions = groups.some((group) =>
+    group.options.some((option) => option.id === "half" || option.id === "full")
+  );
+  const wantsPortion = PORTION_CATEGORIES.has(category) || hasHalfFullOptions;
 
   if (!wantsPortion) return groups;
 
@@ -246,26 +248,50 @@ function applyPortionPrices(groups: OptionGroup[], category: string, portions?: 
   );
 }
 
+export function usesPortionPricing(categorySlug: string) {
+  return PORTION_CATEGORIES.has(categorySlug);
+}
+
+/** Burgers/coffee must never keep a wrongly saved Half/Full size group. */
+function normalizeStoredGroups(groups: OptionGroup[], category: string): OptionGroup[] {
+  if (PORTION_CATEGORIES.has(category)) return groups;
+  return groups.map((group) => {
+    if (group.id !== "size") return group;
+    const hasHalfFull = group.options.some((option) => option.id === "half" || option.id === "full");
+    if (!hasHalfFull) return group;
+    const largeDelta =
+      group.options.find((option) => option.id === "full" || option.id === "large")?.priceDelta ?? 40;
+    return { ...sizeGroup(largeDelta), hidden: Boolean(group.hidden) };
+  });
+}
+
 /**
  * Kitchen-saved option groups are the source of truth.
  * Never re-add Half/Full if staff hid or removed that section.
  * Only refresh Full price deltas when the size group is still enabled.
  */
-function syncStoredPortionPrices(groups: OptionGroup[], portions?: PortionPrices | null): OptionGroup[] {
-  const existingSize = groups.find((group) => group.id === "size");
-  if (!existingSize || existingSize.hidden) return groups;
+function syncStoredPortionPrices(
+  groups: OptionGroup[],
+  category: string,
+  portions?: PortionPrices | null
+): OptionGroup[] {
+  const normalized = normalizeStoredGroups(groups, category);
+  if (!PORTION_CATEGORIES.has(category)) return normalized;
+
+  const existingSize = normalized.find((group) => group.id === "size");
+  if (!existingSize || existingSize.hidden) return normalized;
 
   const hasHalfFull = existingSize.options.some(
     (option) => option.id === "half" || option.id === "full"
   );
-  if (!hasHalfFull) return groups;
+  if (!hasHalfFull) return normalized;
 
   const { half, full } = resolvePortionPrices(portions);
   const fallbackDelta =
     existingSize.options.find((option) => option.id === "full")?.priceDelta ?? 50;
   const fullDelta = full != null && full > 0 ? Math.max(0, full - half) : fallbackDelta;
 
-  return groups.map((group) => {
+  return normalized.map((group) => {
     if (group.id !== "size") return group;
     return {
       ...group,
@@ -372,7 +398,7 @@ export function optionGroupsFor(
   const stored = parseStoredCustomizations(storedJson);
   const base =
     stored != null
-      ? syncStoredPortionPrices(cloneGroups(stored), portions)
+      ? syncStoredPortionPrices(cloneGroups(stored), category, portions)
       : defaultOptionGroupsFor(category, isVeg, portions);
   if (options?.includeHidden) return base;
   return base.filter((group) => !group.hidden && group.options.length > 0);

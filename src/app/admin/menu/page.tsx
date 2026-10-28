@@ -12,7 +12,7 @@ import { CustomizationEditor } from "@/components/admin/CustomizationEditor";
 import { formatINR } from "@/lib/constants";
 import { userFacingError } from "@/lib/publicError";
 import { buildCategoryPlates, filterMenuItems, parseDiet } from "@/lib/menuView";
-import { defaultOptionGroupsFor, type OptionGroup } from "@/lib/customizations";
+import { defaultOptionGroupsFor, usesPortionPricing, type OptionGroup } from "@/lib/customizations";
 import {
   deleteKitchenCategory,
   deleteKitchenItem,
@@ -144,15 +144,17 @@ function AdminMenuInner() {
     event.preventDefault();
     if (!category) return;
     setSaving(true);
+    const portionPlate = usesPortionPricing(category.slug);
+    const unit = Number(form.halfPrice || form.price);
     const res = await fetch("/api/menu", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
         categoryId: category.id,
-        price: Number(form.halfPrice || form.price),
-        halfPrice: Number(form.halfPrice || form.price),
-        fullPrice: form.fullPrice === "" ? null : Number(form.fullPrice),
+        price: unit,
+        halfPrice: unit,
+        fullPrice: portionPlate && form.fullPrice !== "" ? Number(form.fullPrice) : null,
         isAvailable: false,
       }),
     });
@@ -223,26 +225,45 @@ function AdminMenuInner() {
             />
             Vegetarian
           </label>
-          <input
-            value={draft.halfPrice}
-            onChange={(event) =>
-              setDraft({
-                ...draft,
-                halfPrice: event.target.value,
-                price: event.target.value,
-              })
-            }
-            className="field-input"
-            placeholder="Half price"
-            inputMode="decimal"
-          />
-          <input
-            value={draft.fullPrice}
-            onChange={(event) => setDraft({ ...draft, fullPrice: event.target.value })}
-            className="field-input"
-            placeholder="Full price"
-            inputMode="decimal"
-          />
+          {usesPortionPricing(item.category.slug) ? (
+            <>
+              <input
+                value={draft.halfPrice}
+                onChange={(event) =>
+                  setDraft({
+                    ...draft,
+                    halfPrice: event.target.value,
+                    price: event.target.value,
+                  })
+                }
+                className="field-input"
+                placeholder="Half price"
+                inputMode="decimal"
+              />
+              <input
+                value={draft.fullPrice}
+                onChange={(event) => setDraft({ ...draft, fullPrice: event.target.value })}
+                className="field-input"
+                placeholder="Full price"
+                inputMode="decimal"
+              />
+            </>
+          ) : (
+            <input
+              value={draft.halfPrice || draft.price}
+              onChange={(event) =>
+                setDraft({
+                  ...draft,
+                  halfPrice: event.target.value,
+                  price: event.target.value,
+                  fullPrice: "",
+                })
+              }
+              className="field-input md:col-span-2"
+              placeholder="Price"
+              inputMode="decimal"
+            />
+          )}
           <div className="md:col-span-2">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5">
               {draft.imageUrl ? (
@@ -300,7 +321,8 @@ function AdminMenuInner() {
               onClick={async () => {
                 try {
                   const half = Number(draft.halfPrice || draft.price);
-                  const full = draft.fullPrice === "" ? null : Number(draft.fullPrice);
+                  const portionPlate = usesPortionPricing(item.category.slug);
+                  const full = portionPlate && draft.fullPrice !== "" ? Number(draft.fullPrice) : null;
                   await patchKitchenItem(item.id, {
                     name: draft.name,
                     description: draft.description,
@@ -346,11 +368,11 @@ function AdminMenuInner() {
               <span className="min-w-0">
                 <span className="block font-display text-base font-semibold leading-tight line-clamp-2">{item.name}</span>
                 <span className="mt-1 block font-display text-sm text-brand-gold">
-                  {item.halfPrice || item.fullPrice
+                  {usesPortionPricing(item.category.slug) && (item.halfPrice || item.fullPrice)
                     ? `Half ${formatINR(item.halfPrice || item.price)}${
                         item.fullPrice ? ` · Full ${formatINR(item.fullPrice)}` : ""
                       }`
-                    : formatINR(item.price)}
+                    : formatINR(item.halfPrice || item.price)}
                 </span>
               </span>
             </span>
@@ -575,27 +597,47 @@ function AdminMenuInner() {
                 placeholder="Item name"
                 className="field-input"
               />
-              <input
-                required
-                value={form.halfPrice || form.price}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    halfPrice: event.target.value,
-                    price: event.target.value,
-                  })
-                }
-                placeholder="Half price"
-                className="field-input"
-                inputMode="decimal"
-              />
-              <input
-                value={form.fullPrice}
-                onChange={(event) => setForm({ ...form, fullPrice: event.target.value })}
-                placeholder="Full price"
-                className="field-input sm:col-span-2"
-                inputMode="decimal"
-              />
+              {category && usesPortionPricing(category.slug) ? (
+                <>
+                  <input
+                    required
+                    value={form.halfPrice || form.price}
+                    onChange={(event) =>
+                      setForm({
+                        ...form,
+                        halfPrice: event.target.value,
+                        price: event.target.value,
+                      })
+                    }
+                    placeholder="Half price"
+                    className="field-input"
+                    inputMode="decimal"
+                  />
+                  <input
+                    value={form.fullPrice}
+                    onChange={(event) => setForm({ ...form, fullPrice: event.target.value })}
+                    placeholder="Full price"
+                    className="field-input sm:col-span-2"
+                    inputMode="decimal"
+                  />
+                </>
+              ) : (
+                <input
+                  required
+                  value={form.halfPrice || form.price}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      halfPrice: event.target.value,
+                      price: event.target.value,
+                      fullPrice: "",
+                    })
+                  }
+                  placeholder="Price"
+                  className="field-input sm:col-span-2"
+                  inputMode="decimal"
+                />
+              )}
               <div className="sm:col-span-2">
                 <p className="text-sm text-brand-cream/70">Photo</p>
                 <div className="relative mt-2 aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5">
