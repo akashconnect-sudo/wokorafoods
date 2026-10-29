@@ -33,6 +33,7 @@ export const PORTION_CATEGORIES = new Set([
   "chilli-potato",
   "wraps",
   "chicken-lollipop",
+  "tandoori-specials",
 ]);
 
 const spice: OptionGroup = {
@@ -179,6 +180,19 @@ const GROUPS: Record<string, OptionGroup[]> = {
     },
     spice,
   ],
+  "tandoori-specials": [
+    portionGroup(100),
+    {
+      id: "extras",
+      label: "Add extras",
+      type: "multiple",
+      options: [
+        { id: "dip", label: "Extra Dip", priceDelta: 15 },
+        { id: "butter", label: "Extra Butter", priceDelta: 20 },
+      ],
+    },
+    spice,
+  ],
   coffee: [
     sizeGroup(30, "Large"),
     {
@@ -252,8 +266,24 @@ export function usesPortionPricing(categorySlug: string) {
 
 /** Burgers/coffee must never keep a wrongly saved Half/Full size group. */
 function normalizeStoredGroups(groups: OptionGroup[], category: string): OptionGroup[] {
-  if (PORTION_CATEGORIES.has(category)) return groups;
-  return groups.map((group) => {
+  // Kitchen sometimes saved Half/Full under id "half-full" — map to standard "size".
+  const migrated = groups.map((group) => {
+    const hasHalfFull = group.options.some((option) => option.id === "half" || option.id === "full");
+    if (!hasHalfFull) return group;
+    if (group.id === "size" || group.id === "half-full" || group.id === "portion") {
+      return {
+        ...group,
+        id: "size",
+        type: "single" as const,
+        label: group.label?.trim() || "Choose portion",
+      };
+    }
+    return group;
+  });
+
+  if (PORTION_CATEGORIES.has(category)) return migrated;
+
+  return migrated.map((group) => {
     if (group.id !== "size") return group;
     const hasHalfFull = group.options.some((option) => option.id === "half" || option.id === "full");
     if (!hasHalfFull) return group;

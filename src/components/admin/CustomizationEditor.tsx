@@ -61,15 +61,15 @@ export function CustomizationEditor({
   };
 
   const addGroup = () => {
-    const n = groups.length + 1;
+    const stamp = Date.now().toString(36);
     onChange([
       ...groups,
       {
-        id: `extras-${n}`,
+        id: `section-${stamp}`,
         label: "New group",
         type: "multiple",
         hidden: false,
-        options: [{ id: "option-1", label: "Option", priceDelta: 0 }],
+        options: [{ id: `option-${stamp}`, label: "Option", priceDelta: 0 }],
       },
     ]);
   };
@@ -114,7 +114,7 @@ export function CustomizationEditor({
 
       {groups.map((group, groupIndex) => (
         <div
-          key={`${group.id}-${groupIndex}`}
+          key={group.id || `group-${groupIndex}`}
           className={`space-y-2 rounded-xl border p-3 ${
             group.hidden ? "border-white/10 bg-white/[0.02] opacity-70" : "border-white/10 bg-white/5"
           }`}
@@ -122,13 +122,11 @@ export function CustomizationEditor({
           <div className="flex flex-wrap items-center gap-2">
             <input
               value={group.label}
-              onChange={(event) => {
-                const label = event.target.value;
-                const nextId =
-                  group.id === "size" || group.id === "spice" || group.id === "extras"
-                    ? group.id
-                    : slugify(label) || group.id;
-                updateGroup(groupIndex, { label, id: nextId });
+              onChange={(event) => updateGroup(groupIndex, { label: event.target.value })}
+              onBlur={() => {
+                if (group.id === "size" || group.id === "spice" || group.id === "extras") return;
+                const nextId = slugify(group.label) || group.id;
+                if (nextId !== group.id) updateGroup(groupIndex, { id: nextId });
               }}
               className="field-input min-w-0 flex-1"
               placeholder="Section name"
@@ -165,21 +163,22 @@ export function CustomizationEditor({
 
           <div className="space-y-2">
             {group.options.map((option, optionIndex) => (
-              <div key={`${option.id}-${optionIndex}`} className="grid grid-cols-[1fr_5.5rem_auto] gap-2">
+              <div key={option.id || `opt-${optionIndex}`} className="grid grid-cols-[1fr_5.5rem_auto] gap-2">
                 <input
                   value={option.label}
-                  onChange={(event) => {
-                    const label = event.target.value;
+                  onChange={(event) => updateOption(groupIndex, optionIndex, { label: event.target.value })}
+                  onBlur={() => {
                     const keepId =
                       option.id === "half" ||
                       option.id === "full" ||
                       option.id === "mild" ||
                       option.id === "medium" ||
-                      option.id === "spicy";
-                    updateOption(groupIndex, optionIndex, {
-                      label,
-                      id: keepId ? option.id : slugify(label) || option.id,
-                    });
+                      option.id === "spicy" ||
+                      option.id === "regular" ||
+                      option.id === "large";
+                    if (keepId) return;
+                    const nextId = slugify(option.label) || option.id;
+                    if (nextId !== option.id) updateOption(groupIndex, optionIndex, { id: nextId });
                   }}
                   className="field-input"
                   placeholder="Option"

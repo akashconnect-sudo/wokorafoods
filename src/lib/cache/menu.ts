@@ -37,17 +37,14 @@ export async function cacheDel(prefix: string) {
 
   // Fallback when KEYS is blocked: delete common menu GET shapes.
   const modes = ["pub", "all"];
+  const versions = ["hf8", "hf7", "hf6", "hf5", "hf4", "hf3", "hf2"];
   const extras: string[] = [];
   for (const mode of modes) {
     for (const featured of ["true", "false"]) {
-      extras.push(`hf5:${mode}:::${featured}`);
-      extras.push(`hf4:${mode}:::${featured}`);
-      extras.push(`hf3:${mode}:::${featured}`);
-      extras.push(`hf2:${mode}:::${featured}`);
-      extras.push(`hf5:${mode}::`);
-      extras.push(`hf4:${mode}::`);
-      extras.push(`hf3:${mode}::`);
-      extras.push(`hf2:${mode}::`);
+      for (const version of versions) {
+        extras.push(`${version}:${mode}:::${featured}`);
+        extras.push(`${version}:${mode}::`);
+      }
     }
   }
   try {
