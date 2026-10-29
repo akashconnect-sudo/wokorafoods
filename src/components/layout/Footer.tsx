@@ -254,6 +254,17 @@ export function Footer() {
 
       <div className="relative border-t border-white/10 px-4 py-4 text-center text-[11px] leading-relaxed text-brand-cream/45 sm:text-xs">
         <p>© {new Date().getFullYear()} {BRAND.name}. All rights reserved.</p>
+        <p className="mt-1.5">
+          Design By{" "}
+          <a
+            href="https://akashportfoliio-coral.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline decoration-brand-gold/35 underline-offset-2 transition hover:text-brand-gold hover:decoration-brand-gold/60"
+          >
+            AKASH PANDEY
+          </a>
+        </p>
       </div>
     </footer>
   );
