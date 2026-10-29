@@ -96,7 +96,7 @@ export default function KitchenSettingsPage() {
           <input value={settings.hours} onChange={(event) => setSettings({ ...settings, hours: event.target.value })} className="rounded-full border border-white/10 bg-white/5 px-4 py-2" placeholder="Hours" />
           <textarea value={settings.address} onChange={(event) => setSettings({ ...settings, address: event.target.value })} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 md:col-span-2" placeholder="Address" />
           <p className="text-sm text-brand-cream/50 md:col-span-2">
-            Customer checkout shows Wokora Foods only. Bank settlement is stored on the server, not in the browser.
+            Customer checkout shows Wokora Foods only. Settlement details stay private to the kitchen.
           </p>
           {saved && <p className="text-sm text-brand-gold md:col-span-2">{saved}</p>}
           <button className="btn-glow w-full px-5 py-2 sm:w-fit">Save shop</button>

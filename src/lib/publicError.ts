@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const SERVER_ERROR = "Server Error";
+export const SERVER_ERROR = "Something went wrong. Please try again.";
 
 const SAFE_USER_ERRORS = new Set([
   "Login required",

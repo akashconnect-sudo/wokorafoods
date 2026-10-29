@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   const storeId = session?.user.storeId || DEFAULT_STORE_ID;
   const showHidden = session?.user.role === "admin" && searchParams.get("all") === "true";
-  const cacheKey = menuCacheKey(storeId, `hf6:${showHidden ? "all" : "pub"}:${category || ""}:${q || ""}:${featured}`);
+  const cacheKey = menuCacheKey(storeId, `hf7:${showHidden ? "all" : "pub"}:${category || ""}:${q || ""}:${featured}`);
 
   if (!q) {
     const cached = await cacheGet<{ items: unknown; categories: unknown }>(cacheKey);

@@ -58,7 +58,7 @@ export default function SettingsPage() {
             All bills →
           </Link>
         </div>
-        <p className="mt-1 text-sm text-brand-cream/60">Paid and failed payments are stored in the cafe database.</p>
+        <p className="mt-1 text-sm text-brand-cream/60">Your recent Wokora Foods bills and payments are listed below.</p>
         <div className="mt-3 space-y-3">
           {bills.slice(0, 5).map((order) => (
             <OrderBill key={order.id} order={order} compact />

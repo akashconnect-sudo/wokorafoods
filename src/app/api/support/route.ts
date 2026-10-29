@@ -66,6 +66,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, ticket });
   } catch (error) {
     console.error("[support POST]", error);
-    return NextResponse.json({ error: "Server Error" }, { status: 500 });
+    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
   }
 }

@@ -37,7 +37,7 @@ export default function CustomerOrdersPage() {
     <div>
       <h1 className="heading-underline font-display text-3xl font-bold">Your bills</h1>
       <p className="mt-3 text-sm text-brand-cream/60">
-        Paid, failed, and pending payments are saved here from MySQL. Delivered orders stay in this list.
+        Every Wokora Foods bill stays here — paid, pending, or failed. Delivered orders remain for easy reordering.
       </p>
       <div className="mt-8 space-y-4">
         {orders.map((order) => (

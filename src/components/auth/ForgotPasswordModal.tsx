@@ -30,12 +30,12 @@ export function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(userFacingError(typeof data.error === "string" ? data.error : "Server Error"));
+        setError(userFacingError(typeof data.error === "string" ? data.error : undefined));
         return;
       }
       setDone(true);
     } catch {
-      setError("Server Error");
+      setError(userFacingError(undefined));
     } finally {
       setLoading(false);
     }

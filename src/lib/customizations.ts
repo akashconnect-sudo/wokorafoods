@@ -31,7 +31,6 @@ export const PORTION_CATEGORIES = new Set([
   "noodles",
   "fried-rice",
   "chilli-potato",
-  "spring-rolls",
   "wraps",
   "chicken-lollipop",
 ]);
@@ -101,7 +100,6 @@ const GROUPS: Record<string, OptionGroup[]> = {
     spice,
   ],
   "spring-rolls": [
-    portionGroup(40),
     {
       id: "extras",
       label: "Add extras",
