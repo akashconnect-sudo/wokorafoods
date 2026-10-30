@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { mailConfigured, sendMail } from "@/lib/mail";
+import { MAIL_SEND_FAILED, mailConfigured, sendMail } from "@/lib/mail";
 import { prisma } from "@/lib/prisma";
 import { createResetToken } from "@/lib/resetTokens";
 import { getSiteUrl, BRAND } from "@/lib/constants";
@@ -12,22 +12,25 @@ export async function POST(request: Request) {
   }
 
   if (!mailConfigured()) {
-    return NextResponse.json({ error: SERVER_ERROR }, { status: 503 });
+    console.error("[forgot-password] SMTP is not configured");
+    return NextResponse.json({ error: MAIL_SEND_FAILED }, { status: 503 });
   }
 
   const normalized = String(email).trim().toLowerCase();
   const user = await prisma.user.findUnique({ where: { email: normalized } });
+  // Always look successful to strangers; only send when the account exists.
   if (!user) {
     return NextResponse.json({ ok: true });
   }
 
   try {
-    const token = createResetToken(user.id);
+    const token = await createResetToken(normalized);
     const link = `${getSiteUrl()}/reset-password?token=${token}`;
     await sendMail(
       normalized,
       `${BRAND.name} password reset`,
-      `Reset your ${BRAND.name} password with this link. It expires in 30 minutes.\n\n${link}`
+      `Reset your ${BRAND.name} password with this link. It expires in 30 minutes.\n\n${link}`,
+      `<p>Reset your <strong>${BRAND.name}</strong> password with this link. It expires in 30 minutes.</p><p><a href="${link}">${link}</a></p>`
     );
     return NextResponse.json({ ok: true });
   } catch (error) {

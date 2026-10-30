@@ -44,6 +44,8 @@ const SAFE_USER_ERRORS = new Set([
   "Could not place the order. Please sign in first.",
   "Enter your email to receive an OTP.",
   "Check the form and try again.",
+  "We could not send the email. Please try again shortly.",
+  "Password must be at least 6 characters with one uppercase letter and one symbol.",
 ]);
 
 function looksTechnical(text: string) {

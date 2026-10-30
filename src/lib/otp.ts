@@ -6,7 +6,8 @@ import { BRAND } from "@/lib/constants";
 export type OtpPurpose = "signup" | "login" | "reset";
 
 const OTP_TTL_MS = 5 * 60 * 1000;
-const RESEND_GAP_MS = 45 * 1000;
+export const OTP_RESEND_SECONDS = 60;
+const RESEND_GAP_MS = OTP_RESEND_SECONDS * 1000;
 
 function hashOtp(email: string, purpose: OtpPurpose, code: string) {
   return createHash("sha256").update(`${email}:${purpose}:${code}`).digest("hex");
@@ -42,7 +43,8 @@ export async function createAndSendEmailOtp(email: string, purpose: OtpPurpose) 
   await sendMail(
     normalized,
     `${BRAND.name} verification code`,
-    `Your ${BRAND.name} ${purpose} code is ${code}. It expires in 5 minutes.`
+    `Your ${BRAND.name} ${purpose} code is ${code}. It expires in 5 minutes.`,
+    `<p>Your <strong>${BRAND.name}</strong> ${purpose} code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:4px">${code}</p><p>It expires in 5 minutes.</p>`
   );
 
   return { ok: true as const };

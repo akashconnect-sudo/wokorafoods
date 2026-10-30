@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { otpSendSchema } from "@/lib/validations";
 import { createAndSendEmailOtp } from "@/lib/otp";
-import { mailConfigured } from "@/lib/mail";
+import { MAIL_SEND_FAILED, mailConfigured } from "@/lib/mail";
 import { SERVER_ERROR, userFacingError } from "@/lib/publicError";
 
 export async function POST(request: Request) {
@@ -12,7 +12,8 @@ export async function POST(request: Request) {
   }
 
   if (!mailConfigured()) {
-    return NextResponse.json({ error: SERVER_ERROR }, { status: 503 });
+    console.error("[otp/send] SMTP is not configured");
+    return NextResponse.json({ error: MAIL_SEND_FAILED }, { status: 503 });
   }
 
   try {

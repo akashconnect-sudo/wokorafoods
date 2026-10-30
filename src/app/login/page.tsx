@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useState, Suspense } from "react";
+import { FormEvent, useEffect, useState, Suspense } from "react";
 import { getSession, signIn } from "next-auth/react";
 import { Logo } from "@/components/ui/Logo";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { ForgotPasswordModal } from "@/components/auth/ForgotPasswordModal";
 import { userFacingError } from "@/lib/publicError";
+
+const OTP_RESEND_SECONDS = 60;
 
 function LoginForm() {
   const router = useRouter();
@@ -21,7 +23,15 @@ function LoginForm() {
   const [otpHint, setOtpHint] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(0);
   const [forgotOpen, setForgotOpen] = useState(false);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const timer = window.setTimeout(() => setOtpCooldown((value) => value - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [otpCooldown]);
 
   const sendOtp = async () => {
     setError("");
@@ -31,17 +41,26 @@ function LoginForm() {
       setError("Enter your email to receive an OTP.");
       return;
     }
-    const res = await fetch("/api/otp/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, purpose: "login" }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(userFacingError(data.error || "Server Error"));
-      return;
+    if (otpCooldown > 0 || sendingOtp) return;
+    setSendingOtp(true);
+    try {
+      const res = await fetch("/api/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, purpose: "login" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(userFacingError(typeof data.error === "string" ? data.error : undefined));
+        return;
+      }
+      setOtpHint("OTP sent to your email.");
+      setOtpCooldown(OTP_RESEND_SECONDS);
+    } catch {
+      setError(userFacingError(undefined));
+    } finally {
+      setSendingOtp(false);
     }
-    setOtpHint("OTP sent to your email.");
   };
 
   const submit = async (event: FormEvent) => {
@@ -98,19 +117,29 @@ function LoginForm() {
               className="field-input"
             />
             {useOtp ? (
-              <div className="stack-actions">
-                <input
-                  required
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  value={otp}
-                  onChange={(event) => setOtp(event.target.value)}
-                  placeholder="Email OTP"
-                  className="field-input min-w-0 flex-1"
-                />
-                <button type="button" onClick={sendOtp} className="min-h-11 shrink-0 rounded-full border border-white/15 px-4 py-3 text-sm sm:w-auto">
-                  Send OTP
-                </button>
+              <div className="space-y-2">
+                <div className="stack-actions">
+                  <input
+                    required
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    value={otp}
+                    onChange={(event) => setOtp(event.target.value)}
+                    placeholder="Email OTP"
+                    className="field-input min-w-0 flex-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={sendOtp}
+                    disabled={sendingOtp || otpCooldown > 0}
+                    className="min-h-11 shrink-0 rounded-full border border-white/15 px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                  >
+                    {sendingOtp ? "Sending..." : otpCooldown > 0 ? `Resend in ${otpCooldown}s` : otpHint ? "Resend OTP" : "Send OTP"}
+                  </button>
+                </div>
+                {otpCooldown > 0 ? (
+                  <p className="text-xs text-brand-cream/55">You can request another OTP in {otpCooldown}s.</p>
+                ) : null}
               </div>
             ) : (
               <PasswordField value={password} onChange={setPassword} />
@@ -127,6 +156,7 @@ function LoginForm() {
               setUseOtp((value) => !value);
               setError("");
               setOtpHint("");
+              setOtpCooldown(0);
             }}
             className="mt-3 min-h-11 w-full text-sm text-brand-gold"
           >

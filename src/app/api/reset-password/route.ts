@@ -9,18 +9,30 @@ export async function POST(request: Request) {
   const { token, password } = await request.json();
   const parsed = passwordSchema.safeParse(password);
   if (!parsed.success) {
-    return NextResponse.json({ error: SERVER_ERROR }, { status: 400 });
+    return NextResponse.json(
+      { error: "Password must be at least 6 characters with one uppercase letter and one symbol." },
+      { status: 400 }
+    );
   }
 
-  const userId = typeof token === "string" ? consumeResetToken(token) : null;
-  if (!userId) {
+  const email = typeof token === "string" ? await consumeResetToken(token) : null;
+  if (!email) {
     return NextResponse.json({ error: "Reset request expired" }, { status: 400 });
   }
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { passwordHash: await bcrypt.hash(parsed.data, 10) },
-  });
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    return NextResponse.json({ error: "Reset request expired" }, { status: 400 });
+  }
 
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: await bcrypt.hash(parsed.data, 10) },
+    });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("[reset-password]", error);
+    return NextResponse.json({ error: SERVER_ERROR }, { status: 500 });
+  }
 }

@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { Logo } from "@/components/ui/Logo";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { userFacingError } from "@/lib/publicError";
+
+const OTP_RESEND_SECONDS = 60;
 
 function lettersOnly(value: string) {
   return value.replace(/[^A-Za-z\s]/g, "").replace(/\s+/g, " ");
@@ -27,10 +29,18 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(0);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const timer = window.setTimeout(() => setOtpCooldown((value) => value - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [otpCooldown]);
 
   const sendOtp = async () => {
     setError("");
     setOtpHint("");
+    if (otpCooldown > 0 || sending) return;
     setSending(true);
     try {
       const res = await fetch("/api/otp/send", {
@@ -38,14 +48,15 @@ export default function SignupPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email, purpose: "signup" }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(userFacingError(data.error || "Server Error"));
+        setError(userFacingError(typeof data.error === "string" ? data.error : undefined));
         return;
       }
       setOtpSent(true);
       setEmailVerified(false);
       setOtpHint("OTP sent.");
+      setOtpCooldown(OTP_RESEND_SECONDS);
     } finally {
       setSending(false);
     }
@@ -147,12 +158,23 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={sendOtp}
-                disabled={sending || !form.email.includes("@")}
-                className="min-h-11 shrink-0 rounded-full border border-white/15 px-4 py-3 text-sm sm:w-auto"
+                disabled={sending || otpCooldown > 0 || !form.email.includes("@") || emailVerified}
+                className="min-h-11 shrink-0 rounded-full border border-white/15 px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
-                {sending ? "Sending..." : emailVerified ? "Verified" : "Send OTP"}
+                {sending
+                  ? "Sending..."
+                  : emailVerified
+                    ? "Verified"
+                    : otpCooldown > 0
+                      ? `Resend in ${otpCooldown}s`
+                      : otpSent
+                        ? "Resend OTP"
+                        : "Send OTP"}
               </button>
             </div>
+            {otpCooldown > 0 && !emailVerified ? (
+              <p className="text-xs text-brand-cream/55">You can request another OTP in {otpCooldown}s.</p>
+            ) : null}
             {otpSent && !emailVerified ? (
               <div className="stack-actions">
                 <input
